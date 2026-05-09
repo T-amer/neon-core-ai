@@ -8,6 +8,11 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --color-neon-cyan: #00F5FF;
+  --color-neon-pink: #FF00E5;
+  --color-neon-green: #39FF14;
+  --color-neon-dark: #030303;
+  --color-neon-gray: #0a0a0a;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -76,6 +81,8 @@
   --sidebar-accent-foreground: #030303;
   --sidebar-border: rgba(0, 245, 255, 0.2);
   --sidebar-ring: #00F5FF;
+  --animate-neon-pulse: neon-pulse 3s ease-in-out infinite;
+  --animate-glow-border: glow-border 2s infinite alternate;
 }
 
 .dark {
@@ -121,23 +128,26 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-neon-dark text-neon-cyan;
+    background-color: #030303;
+    color: #00F5FF;
     background: linear-gradient(135deg, #030303 0%, #0a0a0a 50%, #030303 100%);
   }
   ::selection {
-    @apply bg-neon-cyan text-neon-dark;
+    background-color: #00F5FF;
+    color: #030303;
   }
   ::-webkit-scrollbar {
     width: 8px;
   }
   ::-webkit-scrollbar-track {
-    @apply bg-neon-dark;
+    background-color: #030303;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-neon-cyan rounded;
+    background-color: #00F5FF;
+    border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-neon-pink;
+    background-color: #FF00E5;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
@@ -148,120 +158,101 @@
   select:not(:disabled),
   input[type="checkbox"]:not(:disabled),
   input[type="radio"]:not(:disabled) {
-    @apply cursor-pointer;
+    cursor: pointer;
   }
 }
 
 @layer components {
-  /**
-   * Custom container utility that centers content and adds responsive padding.
-   *
-   * This overrides Tailwind's default container behavior to:
-   * - Auto-center content (mx-auto)
-   * - Add responsive horizontal padding
-   * - Set max-width for large screens
-   *
-   * Usage: <div className="container">...</div>
-   *
-   * For custom widths, use max-w-* utilities directly:
-   * <div className="max-w-6xl mx-auto px-4">...</div>
-   */
   .container {
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 1rem; /* 16px - mobile padding */
+    padding-left: 1rem;
     padding-right: 1rem;
   }
-
   .flex {
     min-height: 0;
     min-width: 0;
   }
-
   @media (min-width: 640px) {
     .container {
-      padding-left: 1.5rem; /* 24px - tablet padding */
+      padding-left: 1.5rem;
       padding-right: 1.5rem;
     }
   }
-
   @media (min-width: 1024px) {
     .container {
-      padding-left: 2rem; /* 32px - desktop padding */
+      padding-left: 2rem;
       padding-right: 2rem;
-      max-width: 1280px; /* Standard content width */
+      max-width: 1280px;
     }
   }
-
-  /* Glassmorphism utilities */
   .glass {
-    @apply backdrop-blur-md bg-white/10 border border-white/20 rounded-lg;
+    backdrop-filter: blur(12px);
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
   }
-
   .glass-dark {
-    @apply backdrop-blur-md bg-black/30 border border-neon-cyan/20 rounded-lg;
+    backdrop-filter: blur(12px);
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 245, 255, 0.2);
+    border-radius: 8px;
   }
-
-  /* Neon glow effects */
   .neon-glow-cyan {
-    @apply shadow-neon-cyan;
+    box-shadow: 0 0 10px #00F5FF, 0 0 20px #00F5FF;
   }
-
   .neon-glow-pink {
-    @apply shadow-neon-pink;
+    box-shadow: 0 0 10px #FF00E5, 0 0 20px #FF00E5;
   }
-
   .neon-glow-green {
-    @apply shadow-neon-green;
+    box-shadow: 0 0 10px #39FF14, 0 0 20px #39FF14;
   }
-
-  /* Neon text effects */
   .neon-text-cyan {
-    @apply text-neon-cyan animate-neon-pulse;
+    color: #00F5FF;
+    animation: neon-pulse 3s ease-in-out infinite;
   }
-
   .neon-text-pink {
-    @apply text-neon-pink;
+    color: #FF00E5;
   }
-
   .neon-text-green {
-    @apply text-neon-green;
+    color: #39FF14;
   }
-
-  /* Neon border effects */
   .neon-border-cyan {
-    @apply border-neon-cyan border-2 animate-glow-border;
+    border-color: #00F5FF;
+    border-width: 2px;
+    animation: glow-border 2s infinite alternate;
   }
-
   .neon-border-pink {
-    @apply border-neon-pink border-2 animate-glow-border;
+    border-color: #FF00E5;
+    border-width: 2px;
+    animation: glow-border 2s infinite alternate;
   }
-
   .neon-border-green {
-    @apply border-neon-green border-2 animate-glow-border;
+    border-color: #39FF14;
+    border-width: 2px;
+    animation: glow-border 2s infinite alternate;
   }
-
-  /* Radial gradient background */
   .radial-gradient-neon {
     background: radial-gradient(circle at 50% 50%, rgba(0, 245, 255, 0.1) 0%, rgba(255, 0, 229, 0.05) 50%, rgba(57, 255, 20, 0) 100%);
   }
-
-  /* Code editor styling */
   .code-editor {
-    @apply font-mono text-sm text-neon-cyan bg-neon-gray rounded-lg p-4 overflow-auto;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.875rem;
+    color: #00F5FF;
+    background-color: #0a0a0a;
+    border-radius: 8px;
+    padding: 1rem;
+    overflow: auto;
     border: 1px solid rgba(0, 245, 255, 0.3);
   }
-
   .code-line {
-    @apply text-neon-cyan;
+    color: #00F5FF;
   }
-
   .code-keyword {
-    @apply text-neon-pink;
+    color: #FF00E5;
   }
-
   .code-string {
-    @apply text-neon-green;
+    color: #39FF14;
   }
 }
