@@ -1,12 +1,49 @@
 import React, { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
 import { NeonButton } from "@/components/NeonButton";
 import { CodePreview } from "@/components/CodePreview";
 import { PricingCard } from "@/components/PricingCard";
-import { trpc } from "@/lib/trpc";
-import { Loader2 } from "lucide-react";
 import { AIChatBox, Message } from "@/components/AIChatBox";
+import { Loader2 } from "lucide-react";
+
+async function mockGenerate(niche: string): Promise<string> {
+  await new Promise((r) => setTimeout(r, 2000));
+  const projectName = niche
+    .replace(/[^a-zA-Z0-9]/g, "-")
+    .toLowerCase()
+    .slice(0, 20);
+  return `// Generated boilerplate for ${niche}
+// Project: ${projectName}
+
+const project = {
+  name: "${projectName}",
+  niche: "${niche}",
+  description: "A modern SaaS solution for ${niche}",
+  status: "ready-to-deploy",
+  techStack: ["Next.js", "Tailwind CSS", "PostgreSQL", "Stripe"],
+  features: [
+    "Authentication",
+    "Payment processing",
+    "Dashboard",
+    "API routes"
+  ]
+};
+
+export default project;`;
+}
+
+async function mockAiResponse(prompt: string): Promise<string> {
+  await new Promise((r) => setTimeout(r, 1500));
+  return `Here's what I recommend for "${prompt}":
+
+1. **Start with a landing page** that clearly communicates your value proposition
+2. **Add authentication** using NextAuth.js or Clerk
+3. **Set up a database** with PostgreSQL and Prisma ORM
+4. **Implement Stripe** for payment processing
+5. **Deploy on Vercel** for optimal performance
+
+Would you like me to elaborate on any of these steps?`;
+}
 
 export default function Home() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -14,12 +51,10 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedCode, setGeneratedCode] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const [chatMessages, setChatMessages] = useState<Message[]>([
     { role: "system", content: "You are a helpful assistant for Neon Core AI." },
   ]);
-
-  const generateMutation = trpc.boilerplate.generate.useMutation();
-  const aiMutation = trpc.ai.generateResponse.useMutation();
 
   const handleGenerate = async () => {
     if (!niche.trim()) {
@@ -27,22 +62,15 @@ export default function Home() {
       return;
     }
 
-    if (!isAuthenticated) {
-      window.location.href = getLoginUrl();
-      return;
-    }
-
     setIsGenerating(true);
     setShowPreview(true);
 
     try {
-      const result = await generateMutation.mutateAsync({ niche });
-      const code = `// Generated boilerplate for ${result.niche}\n// Project: ${result.projectName}\n\nconst project = {\n  name: "${result.projectName}",\n  niche: "${result.niche}",\n  description: "${result.description}",\n  status: "ready-to-deploy"\n};\n\nexport default project;`;
+      const code = await mockGenerate(niche);
       setGeneratedCode(code);
     } catch (error) {
       console.error("Generation failed:", error);
-      const errorMsg = error instanceof Error ? error.message : "Generation failed";
-      setGeneratedCode(`// Error: ${errorMsg}`);
+      setGeneratedCode(`// Error: ${error instanceof Error ? error.message : "Generation failed"}`);
     } finally {
       setIsGenerating(false);
     }
@@ -51,13 +79,16 @@ export default function Home() {
   const handleSendMessage = async (content: string) => {
     const newUserMessage: Message = { role: "user", content };
     setChatMessages((prev) => [...prev, newUserMessage]);
+    setAiLoading(true);
 
     try {
-      const result = await aiMutation.mutateAsync({ prompt: content });
-      const aiResponseMessage: Message = { role: "assistant", content: result.response };
+      const response = await mockAiResponse(content);
+      const aiResponseMessage: Message = { role: "assistant", content: response };
       setChatMessages((prev) => [...prev, aiResponseMessage]);
     } catch (error) {
       console.error("AI Error:", error);
+    } finally {
+      setAiLoading(false);
     }
   };
 
@@ -87,15 +118,9 @@ export default function Home() {
                 </button>
               </>
             ) : (
-              <a
-                href={getLoginUrl()}
-                className="text-sm font-mono transition-colors"
-                style={{ color: "#00F5FF" }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#FF00E5")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "#00F5FF")}
-              >
-                Login
-              </a>
+              <span className="text-sm font-mono" style={{ color: "#00F5FF" }}>
+                Demo Mode
+              </span>
             )}
           </div>
         </div>
@@ -124,7 +149,7 @@ export default function Home() {
                 placeholder="e.g., Dental Clinic, Gym, Lawyer, E-commerce..."
                 value={niche}
                 onChange={(e) => setNiche(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleGenerate()}
+                onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
                 className="flex-1 px-6 py-4 rounded-lg focus:outline-none font-mono"
                 style={{
                   backgroundColor: "rgba(10, 10, 10, 0.5)",
@@ -135,7 +160,7 @@ export default function Home() {
                 }}
               />
               <NeonButton
-                label="Generate My SaaS"
+                label={isGenerating ? "Generating..." : "Generate My SaaS"}
                 onClick={handleGenerate}
                 disabled={isGenerating}
                 color="cyan"
@@ -148,7 +173,7 @@ export default function Home() {
             <div className="max-w-4xl mx-auto">
               <div className="mb-4">
                 <h3 className="text-lg font-mono mb-2" style={{ color: "#00F5FF" }}>
-                  Live Preview
+                  Generated Code Preview
                 </h3>
               </div>
               <div className="h-96 rounded-lg overflow-hidden border-2" style={{ borderColor: "rgba(0, 245, 255, 0.5)", backgroundColor: "rgba(10, 10, 10, 0.5)" }}>
@@ -175,7 +200,7 @@ export default function Home() {
             <AIChatBox
               messages={chatMessages}
               onSendMessage={handleSendMessage}
-              isLoading={aiMutation.isPending}
+              isLoading={aiLoading}
               className="border-2 border-[rgba(0,245,255,0.3)]"
             />
           </div>
@@ -201,7 +226,7 @@ export default function Home() {
               description="Perfect for testing or a single project"
               features={["1 Boilerplate Generation", "Full Source Code Access", "Neon UI Theme Included", "30 Days of Support"]}
               color="cyan"
-              onSelect={() => alert("Redirecting to checkout...")}
+              onSelect={() => window.open("https://buy.stripe.com/test_28o4hC5iD9Wj3HG9AA", "_blank")}
             />
             <PricingCard
               title="Unlimited Access"
@@ -210,15 +235,15 @@ export default function Home() {
               features={["Unlimited Boilerplate Generations", "Full Source Code Access", "All Neon UI Themes", "Priority Support", "Team Collaboration Tools", "Custom Domain Support"]}
               isPopular={true}
               color="pink"
-              onSelect={() => alert("Redirecting to checkout...")}
+              onSelect={() => window.open("https://buy.stripe.com/test_5kA7vC2iD1Wj3HGcCC", "_blank")}
             />
           </div>
         </div>
       </section>
 
       <footer className="border-t py-8 px-4" style={{ borderColor: "rgba(0, 245, 255, 0.2)", backgroundColor: "rgba(3, 3, 3, 0.5)" }}>
-        <div className="max-w-6xl mx-auto text-center text-sm font-mono" style={{ color: "rgba(0, 245, 255, 0.5)" }}>
-          <p>© 2026 NEON-CORE AI. All rights reserved. | Powered by Next.js + Neon UI</p>
+        <div className="max-w-7xl mx-auto text-center text-sm font-mono" style={{ color: "rgba(0, 245, 255, 0.5)" }}>
+          <p>© 2026 NEON-CORE AI. All rights reserved. | Powered by AI</p>
         </div>
       </footer>
     </div>
