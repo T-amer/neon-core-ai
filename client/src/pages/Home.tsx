@@ -184,6 +184,41 @@ function FloatingShape({ className, children }: { className?: string; children: 
   );
 }
 
+function Counter({ to, prefix = "", suffix = "", label }: { to: number; prefix?: string; suffix?: string; label: string }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          let start = 0;
+          const duration = 1500;
+          const step = Math.ceil(to / (duration / 16));
+          const timer = setInterval(() => {
+            start += step;
+            if (start >= to) { setCount(to); clearInterval(timer); }
+            else setCount(start);
+          }, 16);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [to]);
+  return (
+    <div ref={ref}>
+      <p className="text-3xl font-bold font-mono" style={{ color: "#FF00E5", textShadow: "0 0 20px rgba(255,0,229,0.3)" }}>
+        {prefix}{count}{suffix}
+      </p>
+      <p className="text-xs mt-2" style={{ color: "rgba(255,255,255,0.25)" }}>{label}</p>
+    </div>
+  );
+}
+
 export default function Home() {
   const { user, isAuthenticated, logout } = useAuth();
   const [niche, setNiche] = useState("");
@@ -192,12 +227,32 @@ export default function Home() {
   const [showPreview, setShowPreview] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [chatMessages, setChatMessages] = useState<Message[]>([
     { role: "system", content: "You are NEON-CORE AI, a SaaS architecture expert." },
   ]);
   const heroRef = useRef<HTMLDivElement>(null);
 
   useScrollReveal();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const total = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(Math.min((window.scrollY / total) * 100, 100));
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: (e.clientX / window.innerWidth - 0.5) * 2, y: (e.clientY / window.innerHeight - 0.5) * 2 });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
 
   const handleGenerate = async () => {
     if (!niche.trim()) { alert("Enter your business niche"); return; }
@@ -233,6 +288,11 @@ export default function Home() {
         <Orb className="bottom-1/4 left-1/3 animate-float-delayed" color="rgba(57, 255, 20, 0.4)" size={350} />
       </div>
 
+      {/* SCROLL PROGRESS BAR */}
+      <div className="fixed top-0 left-0 right-0 z-[60] h-[3px]">
+        <div style={{ width: `${scrollProgress}%`, height: "100%", background: "linear-gradient(90deg, #00F5FF, #FF00E5)", boxShadow: "0 0 20px rgba(0,245,255,0.5), 0 0 40px rgba(255,0,229,0.3)", transition: "width 0.1s linear" }} />
+      </div>
+
       {/* NAV */}
       <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-2xl border-b" style={{ backgroundColor: "rgba(3,3,3,0.8)", borderColor: "rgba(0,245,255,0.06)" }}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -247,15 +307,50 @@ export default function Home() {
             <button onClick={() => scrollTo("faq")} className="hover:text-neon-cyan transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-neon-cyan after:transition-all after:duration-300 hover:after:w-full">FAQ</button>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs font-mono px-3 py-1 rounded-full" style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.15)", color: "rgba(0,245,255,0.5)" }}>Live Demo</span>
+            <span className="hidden sm:inline text-xs font-mono px-3 py-1 rounded-full" style={{ background: "rgba(0,245,255,0.08)", border: "1px solid rgba(0,245,255,0.15)", color: "rgba(0,245,255,0.5)" }}>Live Demo</span>
+            {/* HAMBURGER */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden relative w-8 h-8 flex items-center justify-center"
+              aria-label="Menu"
+            >
+              <div className="flex flex-col gap-1.5">
+                <span style={{ width: 20, height: 2, background: "#00F5FF", display: "block", transition: "all 0.3s", transform: isMobileMenuOpen ? "rotate(45deg) translate(3px, 3px)" : "none" }} />
+                <span style={{ width: 20, height: 2, background: "#00F5FF", display: "block", transition: "all 0.3s", opacity: isMobileMenuOpen ? 0 : 1 }} />
+                <span style={{ width: 20, height: 2, background: "#00F5FF", display: "block", transition: "all 0.3s", transform: isMobileMenuOpen ? "rotate(-45deg) translate(3px, -3px)" : "none" }} />
+              </div>
+            </button>
           </div>
         </div>
+        {/* MOBILE MENU */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t" style={{ borderColor: "rgba(0,245,255,0.06)", backgroundColor: "rgba(3,3,3,0.98)" }}>
+            <div className="flex flex-col gap-2 px-6 py-6">
+              {[
+                { id: "solutions", label: "Solutions" },
+                { id: "offer", label: "The Offer" },
+                { id: "pricing", label: "Pricing" },
+                { id: "faq", label: "FAQ" },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => { scrollTo(item.id); setIsMobileMenuOpen(false); }}
+                  className="text-left py-3 px-4 rounded-xl text-sm font-mono transition-all"
+                  style={{ color: "rgba(255,255,255,0.6)", background: "rgba(0,245,255,0.03)" }}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* HERO */}
       <section ref={heroRef} className="relative min-h-screen flex items-center pt-28 pb-20 px-6 overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none" style={{
-          background: "radial-gradient(ellipse at 50% 20%, rgba(0,245,255,0.08) 0%, rgba(255,0,229,0.03) 30%, transparent 60%)"
+        <div className="absolute inset-0 pointer-events-none transition-transform duration-200 ease-out" style={{
+          background: "radial-gradient(ellipse at 50% 20%, rgba(0,245,255,0.08) 0%, rgba(255,0,229,0.03) 30%, transparent 60%)",
+          transform: `translate(${mousePos.x * -15}px, ${mousePos.y * -15}px)`
         }} />
         <div className="absolute inset-0 pointer-events-none" style={{
           backgroundImage: "radial-gradient(rgba(0,245,255,0.06) 1px, transparent 1px)",
@@ -272,14 +367,26 @@ export default function Home() {
           <div style={{ width: 90, height: 90, border: "2px solid rgba(123,47,247,0.3)", borderRadius: "30%", transform: "rotate(30deg)", background: "rgba(123,47,247,0.04)" }} />
         </FloatingShape>
 
-        <div className="max-w-6xl mx-auto relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono tracking-wider mb-8 animate-float" style={{
-            background: "rgba(255,0,229,0.08)", border: "1px solid rgba(255,0,229,0.25)", color: "#FF00E5"
-          }}>
+        <div className="max-w-6xl mx-auto relative z-10 text-center" style={{ transformStyle: "preserve-3d" }}>
+          <div
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono tracking-wider mb-8 animate-float"
+            style={{
+              background: "rgba(255,0,229,0.08)", border: "1px solid rgba(255,0,229,0.25)", color: "#FF00E5",
+              transform: `translate(${mousePos.x * 8}px, ${mousePos.y * 8}px) translateZ(20px)`,
+              transition: "transform 0.2s ease-out",
+            }}
+          >
             <Sparkles size={12} /> Enterprise-Grade AI • Deployed in 48 Hours
           </div>
 
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold font-mono tracking-tight leading-[1.05] mb-6" style={{ perspective: "1000px" }}>
+          <h1
+            className="text-5xl md:text-7xl lg:text-8xl font-bold font-mono tracking-tight leading-[1.05] mb-6"
+            style={{
+              perspective: "1000px",
+              transform: `translate(${mousePos.x * -5}px, ${mousePos.y * -5}px)`,
+              transition: "transform 0.2s ease-out",
+            }}
+          >
             <div style={{ transform: "translateZ(30px)" }}>
               <span className="gradient-text">From Zero</span>
               <br />
@@ -289,7 +396,14 @@ export default function Home() {
             </div>
           </h1>
 
-          <p className="text-lg md:text-xl max-w-3xl mx-auto mb-10" style={{ color: "rgba(255,255,255,0.5)", lineHeight: 1.7 }}>
+          <p
+            className="text-lg md:text-xl max-w-3xl mx-auto mb-10"
+            style={{
+              color: "rgba(255,255,255,0.5)", lineHeight: 1.7,
+              transform: `translate(${mousePos.x * -3}px, ${mousePos.y * -3}px)`,
+              transition: "transform 0.3s ease-out",
+            }}
+          >
             Stop burning <strong style={{ color: "rgba(255,255,255,0.8)" }}>$10k+ on agencies</strong> and months of development. Our AI generates a production-ready Next.js SaaS — 
             with auth, payments, dashboards, and deployment — tailored to your niche and deployable <strong style={{ color: "#00F5FF" }}>tonight</strong>.
           </p>
@@ -505,16 +619,12 @@ export default function Home() {
             <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 30% 50%, rgba(0,245,255,0.04), transparent 60%)" }} />
             <p className="text-xs font-mono tracking-widest mb-6 relative" style={{ color: "rgba(0,245,255,0.4)" }}>ROI CALCULATOR</p>
             <div className="grid md:grid-cols-3 gap-8 text-center relative">
+              <Counter to={50} prefix="$" suffix="k" label="Average agency cost" />
+              <Counter to={6} suffix=" months" label="Average agency timeline" />
               <div>
-                <p className="text-3xl font-bold font-mono" style={{ color: "#FF00E5", textShadow: "0 0 20px rgba(255,0,229,0.3)" }}>$15k–$50k</p>
-                <p className="text-xs mt-2" style={{ color: "rgba(255,255,255,0.25)" }}>Average agency cost</p>
-              </div>
-              <div>
-                <p className="text-3xl font-bold font-mono" style={{ color: "#FF00E5", textShadow: "0 0 20px rgba(255,0,229,0.3)" }}>3–6 months</p>
-                <p className="text-xs mt-2" style={{ color: "rgba(255,255,255,0.25)" }}>Average agency timeline</p>
-              </div>
-              <div>
-                <p className="text-3xl font-bold font-mono" style={{ color: "#39FF14", textShadow: "0 0 20px rgba(57,255,20,0.3)" }}>$49–$10k</p>
+                <p className="text-3xl font-bold font-mono" style={{ color: "#39FF14", textShadow: "0 0 20px rgba(57,255,20,0.3)" }}>
+                  $49–$10k
+                </p>
                 <p className="text-xs mt-2" style={{ color: "rgba(255,255,255,0.25)" }}>Your investment with us</p>
               </div>
             </div>
