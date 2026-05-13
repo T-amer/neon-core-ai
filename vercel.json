@@ -1,0 +1,10 @@
+{
+  "framework": null,
+  "buildCommand": "npx pnpm build:client",
+  "outputDirectory": "dist/public",
+  "devCommand": null,
+  "installCommand": "npx pnpm install --no-frozen-lockfile",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
