@@ -53,15 +53,19 @@ export const PricingCard: React.FC<PricingCardProps> = ({
       }}
     >
       {isPopular && (
-        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-          <span
-            className="px-4 py-1 rounded-full text-xs font-bold font-mono tracking-wider bg-neon-dark border border-neon-pink text-neon-pink"
+        <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 z-10">
+          <div
+            className="px-5 py-1.5 rounded-full text-xs font-bold font-mono tracking-widest uppercase"
             style={{
-              boxShadow: "0 0 15px rgba(255, 0, 229, 0.5)",
+              background: "linear-gradient(135deg, #FF00E5, #7B2FF7)",
+              color: "#fff",
+              boxShadow: "0 0 20px rgba(255, 0, 229, 0.6), 0 0 40px rgba(123, 47, 247, 0.4)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              textShadow: "0 0 10px rgba(255, 255, 255, 0.5)",
             }}
           >
-            MOST POPULAR
-          </span>
+            ⚡ PRO
+          </div>
         </div>
       )}
 
