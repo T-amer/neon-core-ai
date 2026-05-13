@@ -9,85 +9,60 @@ interface NeonButtonProps {
   size?: "sm" | "md" | "lg";
 }
 
+const colorHex: Record<string, string> = {
+  cyan: "#00F5FF",
+  pink: "#FF00E5",
+  green: "#39FF14",
+  indigo: "#6366f1",
+  gray: "#6b7280",
+};
+
+const sizeMap = {
+  sm: "px-4 py-2 text-sm",
+  md: "px-6 py-3 text-base",
+  lg: "px-8 py-4 text-lg",
+};
+
 export const NeonButton: React.FC<NeonButtonProps> = ({
   label,
   onClick,
   disabled = false,
   className = "",
-  color = "cyan",
+  color = "indigo",
   size = "lg",
 }) => {
-  const colorMap = {
-    cyan: "neon-cyan",
-    pink: "neon-pink",
-    green: "neon-green",
-    indigo: "neon-indigo",
-    gray: "neon-gray",
-  };
-
-  const sizeMap = {
-    sm: "px-4 py-2 text-sm",
-    md: "px-6 py-3 text-base",
-    lg: "px-8 py-4 text-lg",
-  };
-
-  const colorHex = {
-    cyan: "#00F5FF",
-    pink: "#FF00E5",
-    green: "#39FF14",
-    indigo: "#6366f1",
-    gray: "#6b7280",
-  };
-
-  const colorRgb = {
-    cyan: "0, 245, 255",
-    pink: "255, 0, 229",
-    green: "57, 255, 20",
-    indigo: "99, 102, 241",
-    gray: "107, 114, 128",
-  };
-
-  const colorClass = colorMap[color];
-  const sizeClass = sizeMap[size];
   const hexColor = colorHex[color];
-  const rgbColor = colorRgb[color];
+  const sizeClass = sizeMap[size];
 
   return (
     <button
       onClick={onClick}
       disabled={disabled}
       className={`
-        relative font-bold font-mono tracking-wider
+        relative font-semibold tracking-wide
         ${sizeClass}
-        bg-neon-dark hover:bg-neon-gray
         transition-all duration-300 ease-out
-        rounded-lg
-        shadow-lg
-        disabled:opacity-50 disabled:cursor-not-allowed
-        group
-        overflow-hidden
+        rounded-xl
+        disabled:opacity-40 disabled:cursor-not-allowed
         ${className}
       `}
       style={{
-        borderWidth: "2px",
-        borderStyle: "solid",
-        borderColor: hexColor,
+        background: "rgba(255,255,255,0.5)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        border: `1px solid ${hexColor}20`,
         color: hexColor,
-        boxShadow: disabled
-          ? "none"
-          : `0 0 20px rgba(${rgbColor}, 0.5), inset 0 0 20px rgba(${rgbColor}, 0.1)`,
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = `rgba(99,102,241,0.08)`;
+        e.currentTarget.style.borderColor = `${hexColor}50`;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = "rgba(255,255,255,0.5)";
+        e.currentTarget.style.borderColor = `${hexColor}20`;
       }}
     >
-      {/* Animated background glow */}
-      <div
-        className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300"
-        style={{
-          background: `radial-gradient(circle at 50% 50%, ${hexColor}, transparent)`,
-        }}
-      />
-
-      {/* Text content */}
-      <span className="relative z-10 block">{label}</span>
+      {label}
     </button>
   );
 };

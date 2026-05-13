@@ -4,62 +4,101 @@ import { NeonButton } from "@/components/NeonButton";
 import { CodePreview } from "@/components/CodePreview";
 import { PricingCard } from "@/components/PricingCard";
 import { AIChatBox, Message } from "@/components/AIChatBox";
-import { Loader2, Star, Shield, Clock, Users, ArrowUpRight, Check, ChevronDown, Menu, X } from "lucide-react";
+import { Loader2, Star, Shield, Clock, Users, Check, ChevronDown, Menu, X, ArrowRight } from "lucide-react";
 
 const styles = `
 *, *::before, *::after { box-sizing: border-box; }
 
-.card {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 16px;
+.glass-card {
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.8);
+  border-radius: 20px;
   transition: all 0.3s ease;
 }
-.card:hover {
-  background: rgba(255,255,255,0.05);
-  border-color: rgba(99,102,241,0.2);
-  box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+.glass-card:hover {
+  background: rgba(255,255,255,0.8);
+  border-color: rgba(99,102,241,0.15);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.04);
 }
 
-.gradient-text {
-  background: linear-gradient(135deg, #818cf8, #6366f1);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.glass-nav {
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(0,0,0,0.04);
 }
 
-.section-label {
+.glass-btn {
+  background: rgba(255,255,255,0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(99,102,241,0.2);
+  border-radius: 12px;
+  padding: 14px 28px;
+  font-weight: 600;
+  font-size: 15px;
+  color: #6366f1;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.glass-btn:hover {
+  background: rgba(99,102,241,0.08);
+  border-color: rgba(99,102,241,0.3);
+  box-shadow: 0 4px 20px rgba(99,102,241,0.1);
+}
+.glass-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.glass-input {
+  background: rgba(255,255,255,0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 12px;
+  padding: 14px 20px;
+  font-size: 15px;
+  color: #1a1a1a;
+  outline: none;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+.glass-input:focus {
+  border-color: rgba(99,102,241,0.3);
+  box-shadow: 0 0 0 4px rgba(99,102,241,0.08);
+  background: rgba(255,255,255,0.8);
+}
+.glass-input::placeholder {
+  color: rgba(0,0,0,0.2);
+}
+
+.section-tag {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 14px;
+  padding: 6px 16px;
   border-radius: 100px;
   font-size: 12px;
-  font-family: monospace;
-  letter-spacing: 0.05em;
-  background: rgba(99,102,241,0.08);
-  border: 1px solid rgba(99,102,241,0.15);
-  color: #818cf8;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: #6366f1;
+  background: rgba(99,102,241,0.06);
+  border: 1px solid rgba(99,102,241,0.1);
 }
 
-.input-field {
-  width: 100%;
-  padding: 14px 20px;
-  border-radius: 12px;
-  font-family: monospace;
-  font-size: 14px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: #fff;
-  outline: none;
-  transition: all 0.3s;
-}
-.input-field:focus {
-  border-color: rgba(99,102,241,0.3);
-  box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
-}
-.input-field::placeholder {
-  color: rgba(255,255,255,0.2);
+.spotlight {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  width: 800px;
+  height: 800px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, rgba(99,102,241,0.02) 30%, transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s;
 }
 `;
 
@@ -70,7 +109,7 @@ function useScrollReveal() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("opacity-100", "translate-y-0");
-            entry.target.classList.remove("opacity-0", "translate-y-8");
+            entry.target.classList.remove("opacity-0", "translate-y-6");
           }
         });
       },
@@ -95,6 +134,15 @@ const faqs = [
   { q: "What if I need custom features?", a: "You receive full source code with no restrictions. Your team can extend it freely. Enterprise clients also receive 1-on-1 architecture calls to plan customizations." },
   { q: "Is there a refund policy?", a: "30-day money-back guarantee, no questions asked. If the boilerplate doesn't meet your standards, you receive a full refund." },
   { q: "Do I own the code?", a: "100% yours. No licensing fees, no recurring royalties, no hidden costs. You own everything we generate." },
+];
+
+const features = [
+  { title: "Authentication & RBAC", desc: "Complete auth system with role-based access control, social login, session management, and security best practices built in." },
+  { title: "Payment Processing", desc: "Stripe integration with subscription management, invoicing, webhooks, and revenue analytics dashboard." },
+  { title: "Database Schema", desc: "PostgreSQL with Prisma ORM. Optimized migrations, relationships, and query performance for SaaS applications." },
+  { title: "Admin Dashboard", desc: "Full admin panel with user management, analytics, logs, and system configuration. Ready to customize." },
+  { title: "API Infrastructure", desc: "Type-safe API routes with rate limiting, caching, validation, and comprehensive error handling." },
+  { title: "Deployment Pipeline", desc: "One-click deploy to Vercel with custom domain, SSL, CI/CD, and monitoring out of the box." },
 ];
 
 async function mockBoilerplate(niche: string): Promise<string> {
@@ -132,10 +180,6 @@ async function mockAiResponse(prompt: string): Promise<string> {
     `*Want to dive deeper into any of these steps? I'm here 24/7.*`;
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <div className="section-label">{children}</div>;
-}
-
 function Counter({ to, prefix = "", suffix = "", label }: { to: number; prefix?: string; suffix?: string; label: string }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
@@ -162,10 +206,10 @@ function Counter({ to, prefix = "", suffix = "", label }: { to: number; prefix?:
   }, [to]);
   return (
     <div ref={ref}>
-      <p className="text-4xl font-bold tracking-tight" style={{ color: "#818cf8" }}>
+      <p className="text-4xl font-bold tracking-tight" style={{ color: "#6366f1" }}>
         {prefix}{count}{suffix}
       </p>
-      <p className="text-sm mt-2" style={{ color: "rgba(255,255,255,0.3)" }}>{label}</p>
+      <p className="text-sm mt-2" style={{ color: "rgba(0,0,0,0.3)" }}>{label}</p>
     </div>
   );
 }
@@ -179,11 +223,20 @@ export default function Home() {
   const [aiLoading, setAiLoading] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: -999, y: -999 });
   const [chatMessages, setChatMessages] = useState<Message[]>([
     { role: "system", content: "You are NEON-CORE AI, a SaaS architecture expert." },
   ]);
 
   useScrollReveal();
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
 
   const handleGenerate = async () => {
     if (!niche.trim()) { alert("Enter your business niche"); return; }
@@ -218,24 +271,49 @@ export default function Home() {
   ];
 
   return (
-    <div style={{ backgroundColor: "#0a0a0a", color: "#fff" }}>
+    <div style={{ backgroundColor: "#f8f9fb", color: "#1a1a1a", minHeight: "100vh" }}>
       <style>{styles}</style>
 
+      {/* SPOTLIGHT */}
+      <div
+        className="spotlight"
+        style={{ left: mousePos.x, top: mousePos.y, opacity: mousePos.x < 0 ? 0 : 1 }}
+      />
+
+      {/* AMBIENT ORBS */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div style={{
+          position: "absolute", top: "10%", left: "5%", width: 500, height: 500,
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(99,102,241,0.04) 0%, transparent 70%)",
+        }} />
+        <div style={{
+          position: "absolute", bottom: "20%", right: "10%", width: 400, height: 400,
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(99,102,241,0.03) 0%, transparent 70%)",
+        }} />
+        <div style={{
+          position: "absolute", top: "40%", right: "30%", width: 300, height: 300,
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(99,102,241,0.03) 0%, transparent 70%)",
+        }} />
+      </div>
+
       {/* NAV */}
-      <nav className="fixed top-0 left-0 right-0 z-50" style={{ background: "rgba(10,10,10,0.85)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+      <nav className="glass-nav fixed top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="text-lg font-bold tracking-tight">
-            <span style={{ color: "#818cf8" }}>NEON</span><span style={{ color: "rgba(255,255,255,0.9)" }}>_CORE</span>
+            <span style={{ color: "#6366f1" }}>NEON</span><span style={{ color: "rgba(0,0,0,0.8)" }}>_CORE</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
               <button
                 key={link.id}
                 onClick={() => scrollTo(link.id)}
-                className="text-sm transition-colors"
-                style={{ color: "rgba(255,255,255,0.4)", letterSpacing: "0.02em" }}
-                onMouseEnter={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.8)"}
-                onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.4)"}
+                className="text-sm transition-all"
+                style={{ color: "rgba(0,0,0,0.4)", fontWeight: 500 }}
+                onMouseEnter={(e) => e.currentTarget.style.color = "rgba(0,0,0,0.8)"}
+                onMouseLeave={(e) => e.currentTarget.style.color = "rgba(0,0,0,0.4)"}
               >
                 {link.label}
               </button>
@@ -246,7 +324,7 @@ export default function Home() {
             className="md:hidden p-2"
             aria-label="Menu"
           >
-            {isMenuOpen ? <X size={20} style={{ color: "rgba(255,255,255,0.6)" }} /> : <Menu size={20} style={{ color: "rgba(255,255,255,0.6)" }} />}
+            {isMenuOpen ? <X size={20} style={{ color: "rgba(0,0,0,0.5)" }} /> : <Menu size={20} style={{ color: "rgba(0,0,0,0.5)" }} />}
           </button>
         </div>
         {isMenuOpen && (
@@ -255,8 +333,8 @@ export default function Home() {
               <button
                 key={link.id}
                 onClick={() => scrollTo(link.id)}
-                className="block w-full text-left py-3 px-4 rounded-lg text-sm transition-colors"
-                style={{ color: "rgba(255,255,255,0.6)", background: "rgba(255,255,255,0.03)" }}
+                className="block w-full text-left py-3 px-4 rounded-lg text-sm"
+                style={{ color: "rgba(0,0,0,0.6)", background: "rgba(0,0,0,0.02)" }}
               >
                 {link.label}
               </button>
@@ -266,41 +344,38 @@ export default function Home() {
       </nav>
 
       {/* HERO */}
-      <section className="relative pt-36 pb-24 px-6 overflow-hidden">
-        <div className="absolute inset-0" style={{
-          background: "radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.06) 0%, transparent 60%)"
-        }} />
-        <div className="max-w-5xl mx-auto text-center relative">
-          <div className="flex justify-center mb-8 reveal opacity-0 translate-y-8 transition-all duration-700">
-            <SectionLabel>AI-Powered SaaS Generation</SectionLabel>
+      <section className="relative pt-36 pb-24 px-6" style={{ zIndex: 1 }}>
+        <div className="max-w-5xl mx-auto text-center">
+          <div className="flex justify-center mb-8 reveal opacity-0 translate-y-6 transition-all duration-700">
+            <div className="section-tag">AI-Powered SaaS Generation</div>
           </div>
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.05] mb-6 reveal opacity-0 translate-y-8 transition-all duration-700" style={{ transitionDelay: "0.1s" }}>
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.05] mb-6 reveal opacity-0 translate-y-6 transition-all duration-700" style={{ transitionDelay: "0.1s", color: "#1a1a1a" }}>
             From zero to{" "}
-            <span className="gradient-text">production SaaS</span>
+            <span style={{ color: "#6366f1" }}>production SaaS</span>
             <br />
-            <span style={{ color: "rgba(255,255,255,0.9)" }}>in 48 hours</span>
+            in 48 hours
           </h1>
-          <p className="text-lg md:text-xl max-w-3xl mx-auto mb-12 reveal opacity-0 translate-y-8 transition-all duration-700" style={{ color: "rgba(255,255,255,0.4)", lineHeight: 1.7, transitionDelay: "0.2s" }}>
+          <p className="text-lg md:text-xl max-w-3xl mx-auto mb-12 reveal opacity-0 translate-y-6 transition-all duration-700" style={{ color: "rgba(0,0,0,0.4)", lineHeight: 1.7, transitionDelay: "0.2s" }}>
             NEON-CORE AI generates a complete, production-ready Next.js SaaS boilerplate with authentication, payments, database, and deployment — tailored to your specific business niche.
           </p>
-          <div className="flex flex-col md:flex-row gap-4 max-w-2xl mx-auto mb-8 reveal opacity-0 translate-y-8 transition-all duration-700" style={{ transitionDelay: "0.3s" }}>
+          <div className="flex flex-col md:flex-row gap-4 max-w-2xl mx-auto mb-8 reveal opacity-0 translate-y-6 transition-all duration-700" style={{ transitionDelay: "0.3s" }}>
             <input
               type="text"
               placeholder="Your business niche (e.g., Fintech, Health, E-commerce)"
               value={niche}
               onChange={(e) => setNiche(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
-              className="input-field"
+              className="glass-input"
             />
-            <NeonButton
-              label={isGenerating ? "Generating..." : "Generate My SaaS"}
+            <button
               onClick={handleGenerate}
               disabled={isGenerating}
-              color="indigo"
-              size="lg"
-            />
+              className="glass-btn whitespace-nowrap"
+            >
+              {isGenerating ? "Generating..." : "Generate My SaaS"}
+            </button>
           </div>
-          <div className="flex items-center justify-center gap-6 text-sm reveal opacity-0 translate-y-8 transition-all duration-700" style={{ color: "rgba(255,255,255,0.2)", transitionDelay: "0.4s" }}>
+          <div className="flex items-center justify-center gap-6 text-sm reveal opacity-0 translate-y-6 transition-all duration-700" style={{ color: "rgba(0,0,0,0.25)", transitionDelay: "0.4s" }}>
             <span className="flex items-center gap-1.5"><Shield size={14} /> 30-day guarantee</span>
             <span className="flex items-center gap-1.5"><Check size={14} /> Full ownership</span>
             <span className="flex items-center gap-1.5"><Clock size={14} /> Deploy in hours</span>
@@ -310,21 +385,21 @@ export default function Home() {
 
       {/* CODE PREVIEW */}
       {showPreview && (
-        <section className="px-6 pb-24 -mt-16">
-          <div className="max-w-4xl mx-auto reveal opacity-0 translate-y-8 transition-all duration-700">
-            <div className="rounded-xl overflow-hidden border" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(0,0,0,0.5)" }}>
-              <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+        <section className="px-6 pb-24 -mt-16 relative" style={{ zIndex: 1 }}>
+          <div className="max-w-4xl mx-auto reveal opacity-0 translate-y-6 transition-all duration-700">
+            <div className="glass-card overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
                 <div className="w-3 h-3 rounded-full" style={{ background: "#FF5F56" }} />
                 <div className="w-3 h-3 rounded-full" style={{ background: "#FFBD2E" }} />
                 <div className="w-3 h-3 rounded-full" style={{ background: "#27C93F" }} />
-                <span className="ml-3 text-xs" style={{ color: "rgba(255,255,255,0.15)" }}>generated-boilerplate.ts</span>
+                <span className="ml-3 text-xs" style={{ color: "rgba(0,0,0,0.15)" }}>generated-boilerplate.ts</span>
               </div>
-              <div className="h-80" style={{ background: "rgba(0,0,0,0.3)" }}>
+              <div className="h-80" style={{ background: "rgba(0,0,0,0.02)" }}>
                 {isGenerating ? (
                   <div className="h-full flex items-center justify-center">
                     <div className="text-center">
-                      <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: "#818cf8" }} />
-                      <p className="text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>Generating your boilerplate...</p>
+                      <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: "#6366f1" }} />
+                      <p className="text-sm" style={{ color: "rgba(0,0,0,0.3)" }}>Generating your boilerplate...</p>
                     </div>
                   </div>
                 ) : (
@@ -334,8 +409,12 @@ export default function Home() {
             </div>
             {!isGenerating && generatedCode && (
               <div className="mt-6 flex justify-center gap-4">
-                <NeonButton label="Deploy to Production" color="indigo" size="md" onClick={() => window.open("https://buy.stripe.com/test_5kA7vC2iD1Wj3HGcCC", "_blank")} />
-                <NeonButton label="Chat with AI Advisor" color="gray" size="md" onClick={() => scrollTo("ai-advisor")} />
+                <button className="glass-btn" onClick={() => window.open("https://buy.stripe.com/test_5kA7vC2iD1Wj3HGcCC", "_blank")}>
+                  Deploy to Production <ArrowRight size={16} style={{ marginLeft: 6, display: "inline" }} />
+                </button>
+                <button className="glass-btn" style={{ borderColor: "rgba(0,0,0,0.1)", color: "rgba(0,0,0,0.5)" }} onClick={() => scrollTo("ai-advisor")}>
+                  Chat with AI Advisor
+                </button>
               </div>
             )}
           </div>
@@ -343,26 +422,26 @@ export default function Home() {
       )}
 
       {/* TRUST BAR */}
-      <section className="py-16 px-6" style={{ borderTop: "1px solid rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+      <section className="py-16 px-6 relative" style={{ zIndex: 1, borderTop: "1px solid rgba(0,0,0,0.04)", borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
         <div className="max-w-5xl mx-auto text-center">
-          <p className="text-xs tracking-widest uppercase mb-8" style={{ color: "rgba(255,255,255,0.15)" }}>Trusted by founders and engineers at</p>
+          <p className="text-xs tracking-widest uppercase mb-8" style={{ color: "rgba(0,0,0,0.15)" }}>Trusted by founders and engineers at</p>
           <div className="flex flex-wrap justify-center gap-x-14 gap-y-4">
             {logos.map((logo, i) => (
-              <span key={logo} className="text-sm font-bold tracking-wider" style={{ color: `rgba(255,255,255,${0.15 + i * 0.03})` }}>{logo}</span>
+              <span key={logo} className="text-sm font-bold tracking-wider" style={{ color: `rgba(0,0,0,${0.15 + i * 0.03})` }}>{logo}</span>
             ))}
           </div>
         </div>
       </section>
 
       {/* PROBLEM / SOLUTION */}
-      <section id="solutions" className="py-28 px-6">
+      <section id="solutions" className="py-28 px-6 relative" style={{ zIndex: 1 }}>
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
-            <div className="reveal opacity-0 translate-y-8 transition-all duration-700">
-              <SectionLabel>The Problem</SectionLabel>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-6 leading-tight">
+            <div className="reveal opacity-0 translate-y-6 transition-all duration-700">
+              <div className="section-tag">The Problem</div>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-6 leading-tight" style={{ color: "#1a1a1a" }}>
                 Every month you wait is costing you{" "}
-                <span style={{ color: "#f87171" }}>$10,000+</span>
+                <span style={{ color: "#ef4444" }}>$10,000+</span>
               </h2>
               <ul className="space-y-4">
                 {[
@@ -371,18 +450,18 @@ export default function Home() {
                   "Your idea is validated. What's missing is the technical foundation to ship it",
                   "Competitors are launching and capturing market share every day",
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-base" style={{ color: "rgba(255,255,255,0.4)", lineHeight: 1.7 }}>
-                    <span style={{ color: "#f87171", marginTop: 5, flexShrink: 0 }}>✕</span>
+                  <li key={i} className="flex items-start gap-3 text-base" style={{ color: "rgba(0,0,0,0.4)", lineHeight: 1.7 }}>
+                    <span style={{ color: "#ef4444", marginTop: 5, flexShrink: 0 }}>✕</span>
                     {item}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="reveal opacity-0 translate-y-8 transition-all duration-700" style={{ transitionDelay: "0.15s" }}>
-              <SectionLabel>The Solution</SectionLabel>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-6 leading-tight">
+            <div className="reveal opacity-0 translate-y-6 transition-all duration-700" style={{ transitionDelay: "0.15s" }}>
+              <div className="section-tag">The Solution</div>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-6 leading-tight" style={{ color: "#1a1a1a" }}>
                 Production SaaS in{" "}
-                <span style={{ color: "#34d399" }}>48 hours</span>
+                <span style={{ color: "#059669" }}>48 hours</span>
               </h2>
               <ul className="space-y-4">
                 {[
@@ -391,8 +470,8 @@ export default function Home() {
                   "Deploy to Vercel in one click. Live and accepting payments the same day",
                   "Full source code ownership. Extend it, scale it, own it. Zero lock-in",
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-base" style={{ color: "rgba(255,255,255,0.5)", lineHeight: 1.7 }}>
-                    <span style={{ color: "#34d399", marginTop: 5, flexShrink: 0 }}>✓</span>
+                  <li key={i} className="flex items-start gap-3 text-base" style={{ color: "rgba(0,0,0,0.5)", lineHeight: 1.7 }}>
+                    <span style={{ color: "#059669", marginTop: 5, flexShrink: 0 }}>✓</span>
                     {item}
                   </li>
                 ))}
@@ -403,29 +482,22 @@ export default function Home() {
       </section>
 
       {/* FEATURES */}
-      <section id="features" className="py-28 px-6" style={{ background: "rgba(99,102,241,0.02)" }}>
+      <section id="features" className="py-28 px-6 relative" style={{ zIndex: 1 }}>
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16 reveal opacity-0 translate-y-8 transition-all duration-700">
-            <SectionLabel>Features</SectionLabel>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4">
+          <div className="text-center mb-16 reveal opacity-0 translate-y-6 transition-all duration-700">
+            <div className="section-tag">Features</div>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "#1a1a1a" }}>
               Everything you need to launch
             </h2>
-            <p className="text-lg max-w-3xl mx-auto" style={{ color: "rgba(255,255,255,0.4)" }}>
+            <p className="text-lg max-w-3xl mx-auto" style={{ color: "rgba(0,0,0,0.4)" }}>
               A complete production infrastructure, generated for your exact niche.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { title: "Authentication & RBAC", desc: "Complete auth system with role-based access control, social login, session management, and security best practices built in." },
-              { title: "Payment Processing", desc: "Stripe integration with subscription management, invoicing, webhooks, and revenue analytics dashboard." },
-              { title: "Database Schema", desc: "PostgreSQL with Prisma ORM. Optimized migrations, relationships, and query performance for SaaS applications." },
-              { title: "Admin Dashboard", desc: "Full admin panel with user management, analytics, logs, and system configuration. Ready to customize." },
-              { title: "API Infrastructure", desc: "Type-safe API routes with rate limiting, caching, validation, and comprehensive error handling." },
-              { title: "Deployment Pipeline", desc: "One-click deploy to Vercel with custom domain, SSL, CI/CD, and monitoring out of the box." },
-            ].map((feature, i) => (
-              <div key={i} className="card p-8 reveal opacity-0 translate-y-8 transition-all duration-700" style={{ transitionDelay: `${i * 0.05}s` }}>
-                <h3 className="text-base font-semibold mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>{feature.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.35)", lineHeight: 1.7 }}>{feature.desc}</p>
+            {features.map((feature, i) => (
+              <div key={i} className="glass-card p-8 reveal opacity-0 translate-y-6 transition-all duration-700" style={{ transitionDelay: `${i * 0.05}s` }}>
+                <h3 className="text-base font-semibold mb-3" style={{ color: "#1a1a1a" }}>{feature.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "rgba(0,0,0,0.4)", lineHeight: 1.7 }}>{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -433,49 +505,49 @@ export default function Home() {
       </section>
 
       {/* TESTIMONIALS */}
-      <section className="py-28 px-6">
+      <section className="py-28 px-6 relative" style={{ zIndex: 1 }}>
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16 reveal opacity-0 translate-y-8 transition-all duration-700">
-            <SectionLabel>Testimonials</SectionLabel>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4">
+          <div className="text-center mb-16 reveal opacity-0 translate-y-6 transition-all duration-700">
+            <div className="section-tag">Testimonials</div>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "#1a1a1a" }}>
               Trusted by founders worldwide
             </h2>
-            <p className="text-lg" style={{ color: "rgba(255,255,255,0.4)" }}>
+            <p className="text-lg" style={{ color: "rgba(0,0,0,0.4)" }}>
               Here's what teams are saying after shipping with NEON-CORE.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-6 mb-20">
             {testimonials.map((t, i) => (
-              <div key={i} className="card p-8 reveal opacity-0 translate-y-8 transition-all duration-700" style={{ transitionDelay: `${i * 0.1}s` }}>
+              <div key={i} className="glass-card p-8 reveal opacity-0 translate-y-6 transition-all duration-700" style={{ transitionDelay: `${i * 0.1}s` }}>
                 <div className="flex gap-1 mb-4">
                   {Array.from({ length: t.rating }).map((_, j) => (
                     <Star key={j} size={14} fill="#f59e0b" color="#f59e0b" />
                   ))}
                 </div>
-                <p className="text-sm mb-6 leading-relaxed" style={{ color: "rgba(255,255,255,0.45)", lineHeight: 1.7 }}>
+                <p className="text-sm mb-6 leading-relaxed" style={{ color: "rgba(0,0,0,0.45)", lineHeight: 1.7 }}>
                   "{t.text}"
                 </p>
-                <div className="border-t" style={{ borderColor: "rgba(255,255,255,0.04)", paddingTop: 16 }}>
-                  <p className="text-sm font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>{t.name}</p>
-                  <p className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>{t.role}</p>
+                <div style={{ borderTop: "1px solid rgba(0,0,0,0.04)", paddingTop: 16 }}>
+                  <p className="text-sm font-semibold" style={{ color: "#1a1a1a" }}>{t.name}</p>
+                  <p className="text-xs" style={{ color: "rgba(0,0,0,0.25)" }}>{t.role}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* ROI CALCULATOR */}
-          <div className="card p-10 md:p-14 max-w-4xl mx-auto text-center">
-            <p className="text-xs tracking-widest mb-8" style={{ color: "rgba(255,255,255,0.2)" }}>ROI COMPARISON</p>
+          {/* ROI */}
+          <div className="glass-card p-10 md:p-14 max-w-4xl mx-auto text-center">
+            <p className="text-xs tracking-widest mb-8" style={{ color: "rgba(0,0,0,0.2)" }}>ROI COMPARISON</p>
             <div className="grid md:grid-cols-3 gap-10">
               <Counter to={50} prefix="$" suffix="k" label="Average agency cost" />
               <Counter to={6} suffix=" months" label="Average agency timeline" />
               <div>
-                <p className="text-4xl font-bold tracking-tight" style={{ color: "#34d399" }}>$49–$10k</p>
-                <p className="text-sm mt-2" style={{ color: "rgba(255,255,255,0.3)" }}>Your investment</p>
+                <p className="text-4xl font-bold tracking-tight" style={{ color: "#059669" }}>$49–$10k</p>
+                <p className="text-sm mt-2" style={{ color: "rgba(0,0,0,0.3)" }}>Your investment</p>
               </div>
             </div>
-            <div className="mt-10 pt-8" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-              <p className="text-lg font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>
+            <div className="mt-10 pt-8" style={{ borderTop: "1px solid rgba(0,0,0,0.04)" }}>
+              <p className="text-lg font-semibold" style={{ color: "rgba(0,0,0,0.6)" }}>
                 Save 95% · Ship 50x faster · Own 100% of your code
               </p>
             </div>
@@ -484,14 +556,14 @@ export default function Home() {
       </section>
 
       {/* PRICING */}
-      <section id="pricing" className="py-28 px-6" style={{ background: "rgba(99,102,241,0.02)" }}>
+      <section id="pricing" className="py-28 px-6 relative" style={{ zIndex: 1 }}>
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16 reveal opacity-0 translate-y-8 transition-all duration-700">
-            <SectionLabel>Pricing</SectionLabel>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4">
+          <div className="text-center mb-16 reveal opacity-0 translate-y-6 transition-all duration-700">
+            <div className="section-tag">Pricing</div>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "#1a1a1a" }}>
               Choose your launch path
             </h2>
-            <p className="text-lg" style={{ color: "rgba(255,255,255,0.4)" }}>
+            <p className="text-lg" style={{ color: "rgba(0,0,0,0.4)" }}>
               One price. Full ownership. No recurring fees.
             </p>
           </div>
@@ -499,7 +571,6 @@ export default function Home() {
             <PricingCard
               title="Starter"
               price="$49"
-              duration=""
               description="One SaaS boilerplate. Full ownership."
               features={["1 Boilerplate Generation", "Full Source Code", "Neon UI Theme", "30-Day Guarantee", "1-Click Deploy", "Email Support"]}
               color="indigo"
@@ -508,7 +579,6 @@ export default function Home() {
             <PricingCard
               title="Pro"
               price="$149"
-              duration=""
               description="Unlimited generations. Priority support."
               features={["Unlimited Generations", "Full Source Code", "All UI Themes", "30-Day Guarantee", "Priority Support", "Team Collaboration", "Custom Domain", "API Access"]}
               isPopular={true}
@@ -518,35 +588,34 @@ export default function Home() {
             <PricingCard
               title="Enterprise"
               price="$10,000"
-              duration=""
               description="Done-for-you. White-glove custom build."
               features={["Custom AI Training", "1-on-1 Architecture Call", "Custom Feature Development", "White-Label Deployment", "Dedicated Support Team", "SLA Guarantee", "Source Code Ownership", "Priority API Access"]}
               color="indigo"
               onSelect={() => window.open("https://buy.stripe.com/test_5kA7vC2iD1Wj3HGcCC", "_blank")}
             />
           </div>
-          <div className="text-center max-w-2xl mx-auto reveal opacity-0 translate-y-8 transition-all duration-700">
-            <p className="text-sm" style={{ color: "rgba(255,255,255,0.2)" }}>
-              <Shield size={14} className="inline mr-1" style={{ color: "#34d399" }} /> 
-              Every plan includes a <strong style={{ color: "#34d399" }}>30-day money-back guarantee</strong>. No questions asked.
+          <div className="text-center max-w-2xl mx-auto reveal opacity-0 translate-y-6 transition-all duration-700">
+            <p className="text-sm" style={{ color: "rgba(0,0,0,0.2)" }}>
+              <Shield size={14} className="inline mr-1" style={{ color: "#059669" }} /> 
+              Every plan includes a <strong style={{ color: "#059669" }}>30-day money-back guarantee</strong>. No questions asked.
             </p>
           </div>
         </div>
       </section>
 
       {/* AI ADVISOR */}
-      <section id="ai-advisor" className="py-28 px-6">
-        <div className="max-w-4xl mx-auto reveal opacity-0 translate-y-8 transition-all duration-700">
+      <section id="ai-advisor" className="py-28 px-6 relative" style={{ zIndex: 1 }}>
+        <div className="max-w-4xl mx-auto reveal opacity-0 translate-y-6 transition-all duration-700">
           <div className="text-center mb-12">
-            <SectionLabel>AI Advisor</SectionLabel>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4">
+            <div className="section-tag">AI Advisor</div>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "#1a1a1a" }}>
               Not sure where to start? Ask the AI.
             </h2>
-            <p className="text-lg" style={{ color: "rgba(255,255,255,0.4)" }}>
+            <p className="text-lg" style={{ color: "rgba(0,0,0,0.4)" }}>
               Describe your idea and get an instant architecture strategy.
             </p>
           </div>
-          <div className="card overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+          <div className="glass-card overflow-hidden">
             <AIChatBox
               messages={chatMessages}
               onSendMessage={handleSendMessage}
@@ -557,30 +626,30 @@ export default function Home() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="py-28 px-6" style={{ background: "rgba(99,102,241,0.02)" }}>
+      <section id="faq" className="py-28 px-6 relative" style={{ zIndex: 1 }}>
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-16 reveal opacity-0 translate-y-8 transition-all duration-700">
-            <SectionLabel>FAQ</SectionLabel>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4">
+          <div className="text-center mb-16 reveal opacity-0 translate-y-6 transition-all duration-700">
+            <div className="section-tag">FAQ</div>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "#1a1a1a" }}>
               Common questions
             </h2>
-            <p className="text-lg" style={{ color: "rgba(255,255,255,0.4)" }}>
+            <p className="text-lg" style={{ color: "rgba(0,0,0,0.4)" }}>
               Everything you need to know before getting started.
             </p>
           </div>
           <div className="space-y-3">
             {faqs.map((faq, i) => (
-              <div key={i} className="card overflow-hidden reveal opacity-0 translate-y-8 transition-all duration-700" style={{ transitionDelay: `${i * 0.05}s`, borderColor: openFaq === i ? "rgba(99,102,241,0.2)" : "rgba(255,255,255,0.04)" }}>
+              <div key={i} className="glass-card overflow-hidden reveal opacity-0 translate-y-6 transition-all duration-700" style={{ transitionDelay: `${i * 0.05}s` }}>
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full flex items-center justify-between p-5 text-left"
                 >
-                  <span className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.8)" }}>{faq.q}</span>
-                  <ChevronDown size={16} style={{ color: "rgba(255,255,255,0.2)", transform: openFaq === i ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.3s", flexShrink: 0 }} />
+                  <span className="text-sm font-medium" style={{ color: "#1a1a1a" }}>{faq.q}</span>
+                  <ChevronDown size={16} style={{ color: "rgba(0,0,0,0.2)", transform: openFaq === i ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.3s", flexShrink: 0 }} />
                 </button>
                 {openFaq === i && (
                   <div className="px-5 pb-5 pt-0">
-                    <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.35)", lineHeight: 1.7 }}>{faq.a}</p>
+                    <p className="text-sm leading-relaxed" style={{ color: "rgba(0,0,0,0.35)", lineHeight: 1.7 }}>{faq.a}</p>
                   </div>
                 )}
               </div>
@@ -590,45 +659,45 @@ export default function Home() {
       </section>
 
       {/* FINAL CTA */}
-      <section className="py-28 px-6">
+      <section className="py-28 px-6 relative" style={{ zIndex: 1 }}>
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 leading-tight reveal opacity-0 translate-y-8 transition-all duration-700">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 leading-tight reveal opacity-0 translate-y-6 transition-all duration-700" style={{ color: "#1a1a1a" }}>
             Your SaaS is ready to be{" "}
-            <span className="gradient-text">built</span>
+            <span style={{ color: "#6366f1" }}>built</span>
           </h2>
-          <p className="text-lg mb-10 reveal opacity-0 translate-y-8 transition-all duration-700" style={{ color: "rgba(255,255,255,0.4)", transitionDelay: "0.1s" }}>
+          <p className="text-lg mb-10 reveal opacity-0 translate-y-6 transition-all duration-700" style={{ color: "rgba(0,0,0,0.4)", transitionDelay: "0.1s" }}>
             Enter your niche above and ship your production SaaS tonight.
           </p>
-          <div className="flex flex-col md:flex-row gap-4 max-w-xl mx-auto reveal opacity-0 translate-y-8 transition-all duration-700" style={{ transitionDelay: "0.2s" }}>
+          <div className="flex flex-col md:flex-row gap-4 max-w-xl mx-auto reveal opacity-0 translate-y-6 transition-all duration-700" style={{ transitionDelay: "0.2s" }}>
             <input
               type="text"
               placeholder="Enter your niche..."
               value={niche}
               onChange={(e) => setNiche(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
-              className="input-field"
+              className="glass-input"
             />
-            <NeonButton
-              label={isGenerating ? "Generating..." : "Generate My SaaS"}
+            <button
               onClick={handleGenerate}
               disabled={isGenerating}
-              color="indigo"
-              size="lg"
-            />
+              className="glass-btn whitespace-nowrap"
+            >
+              {isGenerating ? "Generating..." : "Generate My SaaS"}
+            </button>
           </div>
-          <p className="mt-6 text-sm reveal opacity-0 translate-y-8 transition-all duration-700" style={{ color: "rgba(255,255,255,0.15)", transitionDelay: "0.3s" }}>
+          <p className="mt-6 text-sm reveal opacity-0 translate-y-6 transition-all duration-700" style={{ color: "rgba(0,0,0,0.15)", transitionDelay: "0.3s" }}>
             <Shield size={14} className="inline mr-1" /> 30-day guarantee · Full ownership · No subscription
           </p>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="py-12 px-6" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+      <footer className="py-12 px-6 relative" style={{ zIndex: 1, borderTop: "1px solid rgba(0,0,0,0.04)" }}>
         <div className="max-w-7xl mx-auto text-center">
           <div className="text-base font-bold tracking-tight mb-4">
-            <span style={{ color: "#818cf8" }}>NEON</span><span style={{ color: "rgba(255,255,255,0.5)" }}>_CORE</span>
+            <span style={{ color: "#6366f1" }}>NEON</span><span style={{ color: "rgba(0,0,0,0.4)" }}>_CORE</span>
           </div>
-          <p className="text-xs" style={{ color: "rgba(255,255,255,0.1)" }}>
+          <p className="text-xs" style={{ color: "rgba(0,0,0,0.1)" }}>
             © 2026 NEON-CORE AI. All rights reserved.
           </p>
         </div>
