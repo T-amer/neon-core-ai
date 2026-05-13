@@ -9,6 +9,7 @@ interface PricingCardProps {
   isPopular?: boolean;
   onSelect?: () => void;
   color?: "cyan" | "pink" | "green";
+  duration?: string;
 }
 
 export const PricingCard: React.FC<PricingCardProps> = ({
@@ -19,6 +20,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
   isPopular = false,
   onSelect,
   color = "cyan",
+  duration,
 }) => {
   const colorHex = {
     cyan: "#00F5FF",
@@ -73,7 +75,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
 
       <div className="mb-4">
         <span className="text-4xl font-bold text-neon-cyan">{price}</span>
-        <span className="text-neon-cyan/70 ml-2 text-sm">/month</span>
+        {duration !== undefined && <span className="text-neon-cyan/70 ml-2 text-sm">{duration}</span>}
       </div>
 
       <p className="text-neon-cyan/70 text-sm mb-6">{description}</p>
