@@ -5,7 +5,7 @@ interface NeonButtonProps {
   onClick?: () => void;
   disabled?: boolean;
   className?: string;
-  color?: "cyan" | "pink" | "green";
+  color?: "cyan" | "pink" | "green" | "indigo" | "gray";
   size?: "sm" | "md" | "lg";
 }
 
@@ -21,6 +21,8 @@ export const NeonButton: React.FC<NeonButtonProps> = ({
     cyan: "neon-cyan",
     pink: "neon-pink",
     green: "neon-green",
+    indigo: "neon-indigo",
+    gray: "neon-gray",
   };
 
   const sizeMap = {
@@ -33,12 +35,16 @@ export const NeonButton: React.FC<NeonButtonProps> = ({
     cyan: "#00F5FF",
     pink: "#FF00E5",
     green: "#39FF14",
+    indigo: "#6366f1",
+    gray: "#6b7280",
   };
 
   const colorRgb = {
     cyan: "0, 245, 255",
     pink: "255, 0, 229",
     green: "57, 255, 20",
+    indigo: "99, 102, 241",
+    gray: "107, 114, 128",
   };
 
   const colorClass = colorMap[color];
