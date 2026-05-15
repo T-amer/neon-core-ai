@@ -1216,7 +1216,7 @@ export default function Home() {
               >
                 From zero to{" "}
                 <span className="gradient-text">
-                  <ScrambleText text="production SaaS" />
+                  production SaaS
                 </span>
                 <br />
                 in <span style={{ color: "#6366f1" }}>48 hours</span>
@@ -1237,7 +1237,7 @@ export default function Home() {
                 NEON-CORE AI generates a complete, production-ready Next.js SaaS boilerplate with authentication, payments, database, and deployment — tailored to your specific business niche.
               </p>
               <div
-                className="flex flex-col md:flex-row gap-4 max-w-2xl mx-auto mb-8"
+                className="flex flex-col md:flex-row gap-4 max-w-xl mx-auto mb-8 px-4"
                 data-reveal="fade-up"
                 data-stagger="hero"
                 style={{ transitionDelay: "0.45s" }}
@@ -1248,17 +1248,17 @@ export default function Home() {
                   value={niche}
                   onChange={(e) => setNiche(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
-                  className="glass-input"
+                  className="glass-input flex-1"
                 />
                 <button
                   onClick={(e) => { addRipple(e); handleGenerate(); setConfettiTrigger(t => t + 1); }}
                   disabled={isGenerating}
-                  className="glass-btn whitespace-nowrap"
+                  className="glass-btn whitespace-nowrap w-full md:w-auto text-center"
                 >
                   {isGenerating ? (
-                    <span className="flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> Generating...</span>
+                    <span className="flex items-center justify-center gap-2 w-full"><Loader2 size={16} className="animate-spin" /> Generating...</span>
                   ) : (
-                    <span className="flex items-center gap-2"><Zap size={16} /> Generate My SaaS</span>
+                    <span className="flex items-center justify-center gap-2 w-full"><Zap size={16} /> Generate My SaaS</span>
                   )}
                 </button>
               </div>
