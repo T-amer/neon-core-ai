@@ -140,40 +140,40 @@ const styles = `
 }
 
 .glass-card {
-  background: rgba(255,255,255,0.6);
+  background: var(--card-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.8);
+  border: 1px solid var(--card-border-accent);
   border-radius: 20px;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   transform-style: preserve-3d;
   will-change: transform;
 }
 .glass-card:hover {
-  background: rgba(255,255,255,0.85);
+  background: var(--card-bg-highlight);
   border-color: rgba(99,102,241,0.15);
   box-shadow: 0 8px 40px rgba(99,102,241,0.08);
 }
 
 .glass-card-heavy {
-  background: rgba(255,255,255,0.7);
+  background: var(--card-bg-highlight);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,0.9);
+  border: 1px solid var(--card-border-accent);
   border-radius: 24px;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   transform-style: preserve-3d;
   will-change: transform;
 }
 .glass-card-heavy:hover {
-  background: rgba(255,255,255,0.9);
+  background: var(--card-bg);
   border-color: rgba(99,102,241,0.12);
   box-shadow: 0 12px 48px rgba(99,102,241,0.06);
 }
 
 .glass-card-gradient {
   position: relative;
-  background: rgba(255,255,255,0.7);
+  background: var(--card-bg-highlight);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-radius: 24px;
@@ -195,12 +195,12 @@ const styles = `
   animation: rotate-border 6s linear infinite;
 }
 .glass-card-gradient:hover {
-  background: rgba(255,255,255,0.9);
+  background: var(--card-bg);
   box-shadow: 0 12px 48px rgba(99,102,241,0.06);
 }
 
 .glass-nav {
-  background: rgba(255,255,255,0.75);
+  background: var(--card-bg);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-bottom: 1px solid var(--border-faint);
@@ -1057,7 +1057,7 @@ export default function Home() {
   ];
 
   return (
-    <div ref={mainRef} style={{ backgroundColor: "#f8f9fb", color: "var(--text-primary)", minHeight: "100vh" }}>
+    <div ref={mainRef} style={{ backgroundColor: "var(--background)", color: "var(--text-primary)", minHeight: "100vh" }}>
       <style>{styles}</style>
 
       {/* GRAIN OVERLAY */}
@@ -1104,7 +1104,7 @@ export default function Home() {
       <nav
         className="glass-nav fixed top-0 left-0 right-0 z-50"
         style={{
-          background: navScrolled ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.7)",
+          background: navScrolled ? "var(--card-bg-highlight)" : "var(--card-bg)",
           backdropFilter: navScrolled ? "blur(32px)" : "blur(20px)",
           boxShadow: navScrolled ? "0 1px 40px var(--border-faint)" : "none",
         }}
@@ -1140,6 +1140,7 @@ export default function Home() {
             {isMenuOpen ? <X size={20} style={{ color: "var(--text-tertiary)" }} /> : <Menu size={20} style={{ color: "var(--text-tertiary)" }} />}
           </button>
         </div>
+        </div>
         {isMenuOpen && (
           <div className="md:hidden px-6 pb-6 space-y-2">
             {navLinks.map((link) => (
@@ -1157,7 +1158,6 @@ export default function Home() {
             </div>
           </div>
         )}
-        </div>
       </nav>
 
       {/* HERO */}
