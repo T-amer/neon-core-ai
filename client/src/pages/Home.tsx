@@ -519,25 +519,102 @@ async function mockBoilerplate(niche: string): Promise<string> {
   const clean = niche.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase().slice(0, 20);
   return `// NEON-CORE AI — Production Boilerplate for "${niche}"
 // Project: ${clean}
+// Generated: ${new Date().toISOString().slice(0, 10)}
 
-const project = {
-  name: "${clean}",
-  niche: "${niche}",
-  description: "Production-grade SaaS for ${niche}",
-  techStack: ["Next.js 15", "Tailwind CSS v4", "PostgreSQL", "Stripe", "Auth.js"],
-  features: [
-    "Authentication + RBAC",
-    "Payment processing",
-    "Dashboard & Analytics",
-    "SEO-optimized pages",
-    "API routes + Webhooks",
-    "Email notifications"
-  ],
-  performance: { lighthouse: 96, loadTime: "0.8s" }
+// ── Database Schema (Drizzle ORM) ──────────────────────────
+export const users = pgTable("users", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  name: varchar("name", { length: 255 }),
+  role: text("role", { enum: ["user", "admin"] }).default("user"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const ${clean}Projects = pgTable("${clean}_projects", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  status: text("status", { enum: ["draft", "active", "archived"] }).default("draft"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// ── API Routes (tRPC) ──────────────────────────────────────
+export const ${clean}Router = router({
+  list: protectedProcedure
+    .input(z.object({ limit: z.number().default(20) }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.query.${clean}Projects.findMany({
+        limit: input.limit,
+        where: eq(${clean}Projects.userId, ctx.user.id),
+        orderBy: desc(${clean}Projects.createdAt),
+      });
+    }),
+
+  create: protectedProcedure
+    .input(z.object({
+      title: z.string().min(1).max(255),
+      metadata: z.record(z.unknown()).optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.insert(${clean}Projects).values({
+        userId: ctx.user.id,
+        title: input.title,
+        metadata: input.metadata ?? {},
+      }).returning();
+    }),
+});
+
+// ── Frontend Component (React Server Component) ────────────
+export default function ${clean.charAt(0).toUpperCase() + clean.slice(1)}Dashboard() {
+  const { data: projects, isLoading } = api.${clean}.list.useQuery({ limit: 50 });
+
+  if (isLoading) return <DashboardSkeleton />;
+
+  return (
+    <div className="space-y-6 p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">${niche} Dashboard</h1>
+          <p className="text-sm text-muted-foreground">
+            Manage your ${niche.toLowerCase()} projects
+          </p>
+        </div>
+        <NewProjectButton />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {projects?.map((project) => (
+          <ProjectCard key={project.id} project={project} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Stripe Checkout ────────────────────────────────────────
+export const createCheckoutSession = async (priceId: string) => {
+  const session = await stripe.checkout.sessions.create({
+    mode: "subscription",
+    payment_method_types: ["card"],
+    line_items: [{ price: priceId, quantity: 1 }],
+    success_url: \`\${process.env.NEXT_PUBLIC_URL}/dashboard?success=true\`,
+    cancel_url: \`\${process.env.NEXT_PUBLIC_URL}/pricing\`,
+  });
+  return session.url;
 };
 
-export default project;`;
-}
+// ── Auth.js Configuration ──────────────────────────────────
+export const authOptions: NextAuthOptions = {
+  providers: [
+    GoogleProvider({ clientId: process.env.GOOGLE_ID!, clientSecret: process.env.GOOGLE_SECRET! }),
+    GitHubProvider({ clientId: process.env.GITHUB_ID!, clientSecret: process.env.GITHUB_SECRET! }),
+  ],
+  callbacks: {
+    session: ({ session, token }) => ({ ...session, user: { ...session.user, id: token.sub } }),
+  },
+};`; }
 
 async function mockAiResponse(prompt: string): Promise<string> {
   await new Promise((r) => setTimeout(r, 1500));
@@ -1350,7 +1427,6 @@ export default function Home() {
   const [niche, setNiche] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedCode, setGeneratedCode] = useState("");
-  const [showPreview, setShowPreview] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -1369,6 +1445,28 @@ export default function Home() {
   const heroRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLDivElement>(null);
   const heroCardRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+
+  const defaultCodeExample = `// NEON-CORE AI — Production-Grade SaaS Boilerplate
+// Enter your niche above and click "Generate My SaaS"
+// to see your custom code here.
+
+// Example output for "Fintech":
+// ── Database ────────────────────────────────────────────────
+// export const fintechProjects = pgTable("fintech_projects", {
+//   id: uuid("id").defaultRandom().primaryKey(),
+//   ...
+// });
+//
+// ── API Routes ─────────────────────────────────────────────
+// export const fintechRouter = router({
+//   list: protectedProcedure.query(async ({ ctx }) => { ... }),
+// });
+//
+// ── Dashboard ──────────────────────────────────────────────
+// export default function FintechDashboard() {
+//   return <div>Your SaaS awaits</div>;
+// }`;
 
   useScrollReveal();
   useCardSpotlight();
@@ -1524,7 +1622,8 @@ export default function Home() {
 
   const handleGenerate = async () => {
     if (!niche.trim()) { alert("Enter your business niche"); return; }
-    setIsGenerating(true); setShowPreview(true);
+    setIsGenerating(true);
+    previewRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     try { setGeneratedCode(await mockBoilerplate(niche)); }
     catch (e) { setGeneratedCode(`// Error: ${e instanceof Error ? e.message : "Generation failed"}`); }
     finally { setIsGenerating(false); }
@@ -1782,49 +1881,61 @@ export default function Home() {
       </section>
 
       {/* CODE PREVIEW */}
-      {showPreview && (
-        <section className="px-6 pb-24 -mt-16 relative" style={{ zIndex: 1 }}>
-          <div className="max-w-4xl mx-auto" data-reveal="scale-in">
-            <div className="glass-card-heavy overflow-hidden glow-border" data-card-spotlight>
-              <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1px solid var(--border-faint)" }}>
-                <div className="w-3 h-3 rounded-full" style={{ background: "#FF5F56" }} />
-                <div className="w-3 h-3 rounded-full" style={{ background: "#FFBD2E" }} />
-                <div className="w-3 h-3 rounded-full" style={{ background: "#27C93F" }} />
-                <span className="ml-3 text-xs" style={{ color: "var(--text-faint)" }}>generated-boilerplate.ts</span>
-              </div>
-              <div className="h-80" style={{ background: "var(--bg-faint)" }}>
-                {isGenerating ? (
-                  <div className="h-full flex items-center justify-center">
-                    <div className="text-center">
-                      <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: "#6366f1" }} />
-                      <p className="text-sm" style={{ color: "var(--text-quaternary)" }}>Generating your boilerplate...</p>
-                    </div>
-                  </div>
-                ) : (
-                  <CodePreview code={generatedCode} isStreaming={false} language="typescript" />
-                )}
-              </div>
+      <section ref={previewRef} className="px-6 pb-24 relative" style={{ zIndex: 1 }}>
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-6" data-reveal="fade-up">
+            <div className="flex justify-center mb-3">
+              <div className="section-tag pulse-soft">Generated Boilerplate</div>
             </div>
-            {!isGenerating && generatedCode && (
-              <div className="mt-6 flex justify-center gap-4">
-                <button
-                  className="glass-btn"
-                  onClick={(e) => { addRipple(e); window.open("https://buy.stripe.com/test_5kA7vC2iD1Wj3HGcCC", "_blank"); }}
-                >
-                  Deploy to Production <ArrowRight size={16} style={{ marginLeft: 6, display: "inline" }} />
-                </button>
-                <button
-                  className="glass-btn"
-                  style={{ borderColor: "var(--text-faint)", color: "var(--text-tertiary)" }}
-                  onClick={() => scrollTo("ai-advisor")}
-                >
-                  Chat with AI Advisor
-                </button>
-              </div>
-            )}
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
+              Your <span className="gradient-text">Production</span> Code
+            </h2>
+            <p className="text-sm mt-2" style={{ color: "var(--text-quaternary)" }}>
+              {generatedCode ? "Enter your niche above and hit Generate" : "Enter your niche above and hit Generate to see your custom boilerplate"}
+            </p>
           </div>
-        </section>
-      )}
+          <div className="glass-card-heavy overflow-hidden glow-border" data-card-spotlight>
+            <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1px solid var(--border-faint)" }}>
+              <div className="w-3 h-3 rounded-full" style={{ background: "#FF5F56" }} />
+              <div className="w-3 h-3 rounded-full" style={{ background: "#FFBD2E" }} />
+              <div className="w-3 h-3 rounded-full" style={{ background: "#27C93F" }} />
+              <span className="ml-3 text-xs font-mono" style={{ color: "var(--text-faint)" }}>
+                {isGenerating ? "generating..." : generatedCode ? "generated-boilerplate.ts" : "preview.ts"}
+              </span>
+            </div>
+            <div className="h-80 md:h-96" style={{ background: "var(--bg-faint)" }}>
+              {isGenerating ? (
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <Loader2 className="w-10 h-10 animate-spin mx-auto mb-4" style={{ color: "#6366f1" }} />
+                    <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Generating your boilerplate...</p>
+                    <p className="text-xs mt-1" style={{ color: "var(--text-faint)" }}>Building database schema, API routes, and UI components</p>
+                  </div>
+                </div>
+              ) : (
+                <CodePreview code={generatedCode || defaultCodeExample} isStreaming={false} language="typescript" />
+              )}
+            </div>
+          </div>
+          {!isGenerating && generatedCode && (
+            <div className="mt-6 flex justify-center gap-4 flex-wrap">
+              <button
+                className="glass-btn"
+                onClick={(e) => { addRipple(e); window.open("https://buy.stripe.com/test_5kA7vC2iD1Wj3HGcCC", "_blank"); }}
+              >
+                Deploy to Production <ArrowRight size={16} style={{ marginLeft: 6, display: "inline" }} />
+              </button>
+              <button
+                className="glass-btn"
+                style={{ borderColor: "var(--text-faint)", color: "var(--text-tertiary)" }}
+                onClick={() => scrollTo("ai-advisor")}
+              >
+                Chat with AI Advisor
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* TRUST BAR (Marquee) */}
       <section className="py-20 px-6 relative" style={{ zIndex: 1 }}>
