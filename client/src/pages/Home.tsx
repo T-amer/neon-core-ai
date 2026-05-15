@@ -87,6 +87,18 @@ const styles = `
 .float-slow { animation: float 10s ease-in-out infinite; }
 .pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
 .glow-border { animation: glow-border 4s ease-in-out infinite; }
+.light-sweep {
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+}
+.light-sweep::after {
+  content: ""; position: absolute; top: 0; left: -50%; width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+  animation: light-sweep 8s ease-in-out infinite;
+}
+@keyframes light-sweep {
+  0%, 100% { left: -50%; }
+  50% { left: 200%; }
+}
 
 .gradient-text {
   background: linear-gradient(135deg, #6366f1, #8b5cf6, #a78bfa, #6366f1);
@@ -324,9 +336,14 @@ const styles = `
 
 .section-divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(99,102,241,0.08), transparent);
+  background: linear-gradient(90deg, transparent, rgba(99,102,241,0.06), rgba(99,102,241,0.1), rgba(99,102,241,0.06), transparent);
   margin: 0 auto;
-  max-width: 80%;
+  max-width: 70%;
+  animation: divider-pulse 4s ease-in-out infinite;
+}
+@keyframes divider-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }
 
 .typewriter-cursor {
@@ -1012,6 +1029,7 @@ export default function Home() {
 
       {/* HERO */}
       <section ref={heroRef} className="relative pt-36 pb-24 px-6 overflow-hidden" style={{ zIndex: 1 }}>
+        <div className="light-sweep" />
         {/* Floating 3D shapes */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div
@@ -1131,7 +1149,7 @@ export default function Home() {
       {showPreview && (
         <section className="px-6 pb-24 -mt-16 relative" style={{ zIndex: 1 }}>
           <div className="max-w-4xl mx-auto" data-reveal="scale-in">
-            <div className="glass-card overflow-hidden glow-border">
+            <div className="glass-card-heavy overflow-hidden glow-border">
               <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
                 <div className="w-3 h-3 rounded-full" style={{ background: "#FF5F56" }} />
                 <div className="w-3 h-3 rounded-full" style={{ background: "#FFBD2E" }} />
@@ -1275,7 +1293,7 @@ export default function Home() {
             {features.map((feature, i) => (
               <div
                 key={i}
-                className="glass-card p-8 group"
+                className="glass-card-heavy p-8 group"
                 data-tilt
                 data-reveal="blur-in"
                 style={{ transitionDelay: `${i * 0.08}s` }}
@@ -1311,7 +1329,7 @@ export default function Home() {
             {testimonials.map((t, i) => (
               <div
                 key={i}
-                className="glass-card p-8"
+                className="glass-card-heavy p-8"
                 data-tilt
                 data-reveal="fade-up"
                 style={{ transitionDelay: `${i * 0.12}s` }}
@@ -1369,15 +1387,15 @@ export default function Home() {
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-12">
-            <PricingCard
+            <div data-tilt><PricingCard
               title="Starter"
               price="$49"
               description="One SaaS boilerplate. Full ownership."
               features={["1 Boilerplate Generation", "Full Source Code", "Neon UI Theme", "30-Day Guarantee", "1-Click Deploy", "Email Support"]}
               color="indigo"
               onSelect={() => window.open("https://buy.stripe.com/test_28o4hC5iD9Wj3HG9AA", "_blank")}
-            />
-            <PricingCard
+            /></div>
+            <div data-tilt><PricingCard
               title="Pro"
               price="$149"
               description="Unlimited generations. Priority support."
@@ -1385,15 +1403,15 @@ export default function Home() {
               isPopular={true}
               color="indigo"
               onSelect={() => window.open("https://buy.stripe.com/test_5kA7vC2iD1Wj3HGcCC", "_blank")}
-            />
-            <PricingCard
+            /></div>
+            <div data-tilt><PricingCard
               title="Enterprise"
               price="$10,000"
               description="Done-for-you. White-glove custom build."
               features={["Custom AI Training", "1-on-1 Architecture Call", "Custom Feature Development", "White-Label Deployment", "Dedicated Support Team", "SLA Guarantee", "Source Code Ownership", "Priority API Access"]}
               color="indigo"
               onSelect={() => window.open("https://buy.stripe.com/test_5kA7vC2iD1Wj3HGcCC", "_blank")}
-            />
+            /></div>
           </div>
           <div
             className="glass-card-gradient py-8 px-6 max-w-2xl mx-auto text-center"
@@ -1453,7 +1471,7 @@ export default function Home() {
             {faqs.map((faq, i) => (
               <div
                 key={i}
-                className="glass-card overflow-hidden"
+                className="glass-card-heavy overflow-hidden"
                 data-tilt
                 data-reveal="fade-up"
                 style={{ transitionDelay: `${i * 0.06}s` }}
