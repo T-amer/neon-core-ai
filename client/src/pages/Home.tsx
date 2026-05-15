@@ -951,6 +951,7 @@ function GlobeSection() {
     let rotY = 0;
     let prevMouse = { x: 0, y: 0 };
     let mouseActive = false;
+    let animTime = 0;
 
     const resize = () => {
       const rect = section.getBoundingClientRect();
@@ -1033,7 +1034,7 @@ function GlobeSection() {
       rotX += velY;
       rotY += velX;
       rotY += 0.003;
-
+      animTime += 0.02;
 
       const rotXAbs = rotX;
       const rotYAbs = rotY;
@@ -1055,19 +1056,74 @@ function GlobeSection() {
         return proj3D(pos);
       });
 
+      function drawSphereShade(ctx2: CanvasRenderingContext2D) {
+        const lightDir = { x: -0.3, y: -0.5, z: 0.8 };
+        const len = Math.sqrt(lightDir.x ** 2 + lightDir.y ** 2 + lightDir.z ** 2);
+        lightDir.x /= len; lightDir.y /= len; lightDir.z /= len;
+
+        for (let i = 0; i < 7; i++) {
+          const theta = ((i + 0.5) / 7) * Math.PI;
+          const ringR = r * Math.sin(theta);
+          const ringY = r * Math.cos(theta);
+          for (let j = 0; j < 14; j++) {
+            const phi = ((j + 0.5) / 14) * Math.PI * 2;
+            const x = ringR * Math.cos(phi);
+            const z = ringR * Math.sin(phi);
+            let pos = rotateX({ x, y: ringY, z }, rotXAbs);
+            pos = rotateY(pos, rotYAbs);
+            const nx = rotateX({ x: Math.sin(theta) * Math.cos(phi), y: Math.cos(theta), z: Math.sin(theta) * Math.sin(phi) }, rotXAbs);
+            const n = rotateY(nx, rotYAbs);
+            const dot = n.x * lightDir.x + n.y * lightDir.y + n.z * lightDir.z;
+            if (pos.z > -r * 0.05) {
+              const shade = 0.08 + Math.max(0, dot) * 0.1;
+              ctx2.fillStyle = `rgba(99, 102, 241, ${shade})`;
+              const pp = proj3D({ x, y: ringY, z });
+              const dotR = r * 0.035;
+              ctx2.beginPath();
+              ctx2.arc(pp.x, pp.y, dotR, 0, Math.PI * 2);
+              ctx2.fill();
+            }
+          }
+        }
+      }
+
+      function drawLatLines(ctx2: CanvasRenderingContext2D) {
+        for (let lat = -60; lat <= 60; lat += 30) {
+          const pts: { x: number; y: number; z: number }[] = [];
+          for (let lng = 0; lng <= 360; lng += 3) {
+            const theta = (90 - lat) * Math.PI / 180;
+            const phi = lng * Math.PI / 180;
+            pts.push({ x: r * Math.sin(theta) * Math.cos(phi), y: r * Math.cos(theta), z: r * Math.sin(theta) * Math.sin(phi) });
+          }
+          for (let i = 0; i < pts.length - 1; i++) {
+            const p1 = proj3D(pts[i]);
+            const p2 = proj3D(pts[i + 1]);
+            if (p1.z > -r * 0.1 || p2.z > -r * 0.1) {
+              const isEq = lat === 0;
+              ctx2.beginPath();
+              ctx2.moveTo(p1.x, p1.y);
+              ctx2.lineTo(p2.x, p2.y);
+              ctx2.strokeStyle = isEq ? "rgba(167, 139, 250, 0.1)" : "rgba(139, 92, 246, 0.035)";
+              ctx2.lineWidth = isEq ? 0.7 : 0.3;
+              ctx2.stroke();
+            }
+          }
+        }
+      }
+
       function drawWireframe(ctx2: CanvasRenderingContext2D) {
-        for (let i = 0; i <= latSteps; i++) {
+        for (let i = 1; i < latSteps; i++) {
           for (let j = 0; j < lngSteps; j++) {
             const idx = i * (lngSteps + 1) + j;
             const pp1 = wireframeProj[idx];
             const pp2 = wireframeProj[idx + 1];
-            if (pp1.z > -r * 0.3 || pp2.z > -r * 0.3) {
-              const alpha = Math.max(0.06, (pp1.z / r + 1) * 0.1 + 0.05);
+            if (pp1.z > -r * 0.2 || pp2.z > -r * 0.2) {
+              const alpha = Math.max(0.03, (pp1.z / r + 1) * 0.07 + 0.025);
               ctx2.beginPath();
               ctx2.moveTo(pp1.x, pp1.y);
               ctx2.lineTo(pp2.x, pp2.y);
               ctx2.strokeStyle = `rgba(167, 139, 250, ${alpha})`;
-              ctx2.lineWidth = 0.3;
+              ctx2.lineWidth = 0.2;
               ctx2.stroke();
             }
           }
@@ -1077,13 +1133,13 @@ function GlobeSection() {
             const idx = i * (lngSteps + 1) + j;
             const pp1 = wireframeProj[idx];
             const pp2 = wireframeProj[(i + 1) * (lngSteps + 1) + j];
-            if (pp1.z > -r * 0.3 || pp2.z > -r * 0.3) {
-              const alpha = Math.max(0.06, (pp1.z / r + 1) * 0.1 + 0.05);
+            if (pp1.z > -r * 0.2 || pp2.z > -r * 0.2) {
+              const alpha = Math.max(0.03, (pp1.z / r + 1) * 0.07 + 0.025);
               ctx2.beginPath();
               ctx2.moveTo(pp1.x, pp1.y);
               ctx2.lineTo(pp2.x, pp2.y);
               ctx2.strokeStyle = `rgba(139, 92, 246, ${alpha})`;
-              ctx2.lineWidth = 0.3;
+              ctx2.lineWidth = 0.2;
               ctx2.stroke();
             }
           }
@@ -1092,121 +1148,118 @@ function GlobeSection() {
 
       function drawContinents(ctx2: CanvasRenderingContext2D) {
         for (const cont of CONTINENTS) {
-          const pts3D = cont.points.map(([lat, lng]) => {
-            const rad = r * 1.002;
-            return latLngTo3D(lat, lng, rad);
-          });
-
+          const pts3D = cont.points.map(([lat, lng]) => latLngTo3D(lat, lng, r * 1.002));
           const projected = pts3D.map((p) => proj3D(p));
           let avgZ = 0;
           for (const p of projected) avgZ += p.z;
           avgZ /= projected.length;
-
-          if (avgZ > -r * 0.2) {
+          if (avgZ > -r * 0.15) {
+            const depth = (avgZ / r + 1) * 0.5;
+            const alpha = Math.max(0.35, Math.min(0.7, depth * 0.55 + 0.2));
+            const bright = Math.max(0.2, Math.min(0.5, depth * 0.45 + 0.1));
             ctx2.beginPath();
             ctx2.moveTo(projected[0].x, projected[0].y);
-            for (let i = 1; i < projected.length; i++) {
-              ctx2.lineTo(projected[i].x, projected[i].y);
-            }
+            for (let i = 1; i < projected.length; i++) ctx2.lineTo(projected[i].x, projected[i].y);
             ctx2.closePath();
-            const depth = (avgZ / r + 1) * 0.5;
-            const alpha = Math.max(0.3, Math.min(0.6, depth * 0.5 + 0.2));
-            const bright = Math.max(0.15, Math.min(0.45, depth * 0.4 + 0.1));
             ctx2.fillStyle = `rgba(${99 + 50 * bright}, ${70 + 30 * bright}, ${220 + 20 * bright}, ${alpha})`;
             ctx2.fill();
-            ctx2.strokeStyle = `rgba(167, 139, 250, ${alpha * 0.3})`;
-            ctx2.lineWidth = 0.5;
+            ctx2.strokeStyle = `rgba(167, 139, 250, ${alpha * 0.25})`;
+            ctx2.lineWidth = 0.35;
             ctx2.stroke();
           }
         }
       }
 
       function drawConnections(ctx2: CanvasRenderingContext2D) {
-        const city3D = CITIES.map((c) => {
-          const rad = r * 1.002;
-          return latLngTo3D(c.lat, c.lng, rad);
-        });
-
-        for (const [i, j] of CONNECTIONS) {
-          const p1 = proj3D(city3D[i]);
-          const p2 = proj3D(city3D[j]);
+        const city3D = CITIES.map((c) => latLngTo3D(c.lat, c.lng, r * 1.002));
+        for (const [ci, cj] of CONNECTIONS) {
+          const p1 = proj3D(city3D[ci]);
+          const p2 = proj3D(city3D[cj]);
           if (p1.z < -r * 0.1 || p2.z < -r * 0.1) continue;
-
-          const steps = 30;
-          ctx2.beginPath();
-          let started = false;
+          const steps = 36;
+          const arcPts: { x: number; y: number }[] = [];
           for (let s = 0; s <= steps; s++) {
             const t = s / steps;
             const mid = {
-              x: city3D[i].x + (city3D[j].x - city3D[i].x) * t,
-              y: city3D[i].y + (city3D[j].y - city3D[i].y) * t,
-              z: city3D[i].z + (city3D[j].z - city3D[i].z) * t,
+              x: city3D[ci].x + (city3D[cj].x - city3D[ci].x) * t,
+              y: city3D[ci].y + (city3D[cj].y - city3D[ci].y) * t - Math.sin(t * Math.PI) * r * 0.2,
+              z: city3D[ci].z + (city3D[cj].z - city3D[ci].z) * t,
             };
-            const bulge = Math.sin(t * Math.PI) * r * 0.25;
-            mid.y += bulge;
-            const proj = proj3D(mid);
-            if (!started) { ctx2.moveTo(proj.x, proj.y); started = true; }
-            else ctx2.lineTo(proj.x, proj.y);
+            arcPts.push(proj3D(mid));
           }
           const avgZ = (p1.z + p2.z) / 2;
-          const alpha = Math.max(0.04, (avgZ / r + 1) * 0.06);
+          const alpha = Math.max(0.06, (avgZ / r + 1) * 0.09);
+          ctx2.beginPath();
+          ctx2.moveTo(arcPts[0].x, arcPts[0].y);
+          for (let s = 1; s <= steps; s++) ctx2.lineTo(arcPts[s].x, arcPts[s].y);
           ctx2.strokeStyle = `rgba(167, 139, 250, ${alpha})`;
-          ctx2.lineWidth = 0.5;
+          ctx2.lineWidth = 0.7;
           ctx2.stroke();
+
+          const flowT = (animTime * 0.12 + (ci + cj) * 0.15) % 1;
+          const fi = Math.min(Math.floor(flowT * steps), steps);
+          ctx2.beginPath();
+          ctx2.arc(arcPts[fi].x, arcPts[fi].y, 1.8, 0, Math.PI * 2);
+          ctx2.fillStyle = `rgba(167, 139, 250, ${alpha * 2})`;
+          ctx2.fill();
         }
       }
 
       function drawCities(ctx2: CanvasRenderingContext2D) {
-        const city3D = CITIES.map((c) => {
-          const rad = r * 1.002;
-          return latLngTo3D(c.lat, c.lng, rad);
-        });
-
+        const city3D = CITIES.map((c) => latLngTo3D(c.lat, c.lng, r * 1.002));
         for (let i = 0; i < CITIES.length; i++) {
           const proj = proj3D(city3D[i]);
-          if (proj.z < -r * 0.1) continue;
+          if (proj.z < -r * 0.05) continue;
           const depth = (proj.z / r + 1) * 0.5;
-          const alpha = Math.max(0.25, depth * 0.7);
+          const pulse = 0.6 + 0.4 * Math.sin(animTime * 2 + i * 1.7);
+          const alpha = Math.max(0.35, depth * 0.85) * pulse;
 
-          const size = 2 + depth * 2;
           ctx2.beginPath();
-          ctx2.arc(proj.x, proj.y, size, 0, Math.PI * 2);
+          ctx2.arc(proj.x, proj.y, 2.5 + depth * 2, 0, Math.PI * 2);
           ctx2.fillStyle = `rgba(167, 139, 250, ${alpha})`;
           ctx2.fill();
 
-          const glowSize = 6 + depth * 6;
-          const g = ctx2.createRadialGradient(proj.x, proj.y, 0, proj.x, proj.y, glowSize);
+          const glowR = 8 + depth * 8;
+          const g = ctx2.createRadialGradient(proj.x, proj.y, 0, proj.x, proj.y, glowR);
           g.addColorStop(0, `rgba(167, 139, 250, ${alpha * 0.5})`);
           g.addColorStop(1, "transparent");
           ctx2.fillStyle = g;
           ctx2.beginPath();
-          ctx2.arc(proj.x, proj.y, glowSize, 0, Math.PI * 2);
+          ctx2.arc(proj.x, proj.y, glowR, 0, Math.PI * 2);
+          ctx2.fill();
+
+          ctx2.beginPath();
+          ctx2.arc(proj.x, proj.y, 1, 0, Math.PI * 2);
+          ctx2.fillStyle = `rgba(255, 255, 255, ${alpha * 0.4})`;
           ctx2.fill();
         }
       }
 
+      drawSphereShade(ctx);
       drawContinents(ctx);
+      drawLatLines(ctx);
       drawConnections(ctx);
       drawCities(ctx);
       drawWireframe(ctx);
 
-      const glow = ctx.createRadialGradient(cx, cy, r * 0.6, cx, cy, r * 1.4);
-      glow.addColorStop(0, "rgba(99, 102, 241, 0.03)");
-      glow.addColorStop(0.3, "rgba(139, 92, 246, 0.02)");
+      const glow = ctx.createRadialGradient(cx, cy, r * 0.3, cx, cy, r * 1.6);
+      glow.addColorStop(0, "rgba(99, 102, 241, 0.04)");
+      glow.addColorStop(0.3, "rgba(139, 92, 246, 0.025)");
+      glow.addColorStop(0.6, "rgba(167, 139, 250, 0.012)");
       glow.addColorStop(1, "transparent");
       ctx.fillStyle = glow;
       ctx.fillRect(0, 0, w, h);
 
       ctx.beginPath();
       ctx.arc(cx, cy, r * 1.02, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(167, 139, 250, 0.04)";
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba(167, 139, 250, 0.06)";
+      ctx.lineWidth = 0.6;
       ctx.stroke();
 
       ctx.beginPath();
-      ctx.arc(cx, cy, r * 1.06, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(99, 102, 241, 0.02)";
-      ctx.lineWidth = 0.5;
+      ctx.arc(cx, cy, r * 1.08, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(99, 102, 241, 0.03)";
+      ctx.lineWidth = 0.3;
       ctx.stroke();
 
       animId = requestAnimationFrame(draw);
