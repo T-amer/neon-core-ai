@@ -893,7 +893,7 @@ function ScannerLine() {
 /* ─── CONTINENT OUTLINES ─── */
 const CONTINENTS: { name: string; points: [number, number][] }[] = [
   { name: "North America", points: [
-    [52,-128],[48,-124],[42,-124],[36,-120],[32,-116],[28,-112],[25,-108],[22,-104],[20,-100],[18,-96],[16,-92],[14,-88],[12,-84],[10,-80],[10,-76],[12,-72],[15,-68],[18,-64],[22,-70],[25,-75],[28,-80],[30,-85],[34,-78],[38,-76],[42,-72],[46,-66],[50,-56],[54,-58],[58,-64],[62,-70],[66,-78],[68,-86],[70,-94],[70,-102],[70,-110],[70,-118],[70,-126],[68,-134],[64,-140],[60,-146],[56,-136],[52,-130] ]},
+    [52,-128],[48,-124],[42,-124],[36,-120],[32,-116],[28,-112],[25,-108],[22,-104],[20,-100],[18,-96],[16,-92],[14,-88],[12,-84],[10,-80],[10,-76],[12,-72],[15,-68],[18,-64],[22,-70],[25,-75],[28,-80],[30,-85],[34,-78],[38,-76],[42,-72],[46,-66],[50,-56],[52,-58],[54,-58],[58,-64],[62,-70],[66,-78],[68,-86],[70,-94],[70,-102],[70,-110],[70,-118],[70,-126],[68,-134],[64,-140],[60,-146],[56,-136],[52,-130] ]},
   { name: "South America", points: [
     [10,-76],[12,-72],[12,-68],[10,-62],[8,-56],[5,-52],[2,-50],[0,-50],[-2,-48],[-5,-36],[-8,-36],[-12,-38],[-16,-40],[-20,-42],[-24,-44],[-28,-48],[-32,-52],[-36,-56],[-40,-60],[-44,-64],[-48,-68],[-52,-70],[-55,-66],[-54,-62],[-50,-72],[-46,-74],[-42,-76],[-38,-72],[-34,-70],[-30,-68],[-26,-68],[-22,-66],[-18,-62],[-14,-58],[-10,-64],[-6,-72],[-2,-76],[2,-78],[6,-76],[8,-76] ]},
   { name: "Europe", points: [
@@ -906,6 +906,30 @@ const CONTINENTS: { name: string; points: [number, number][] }[] = [
     [-12,130],[-12,134],[-14,138],[-16,140],[-18,142],[-20,144],[-22,146],[-24,148],[-26,150],[-28,152],[-30,154],[-32,156],[-34,158],[-36,160],[-38,162],[-40,164],[-42,166],[-42,170],[-40,172],[-38,174],[-36,176],[-34,178],[-32,180],[-30,180],[-28,178],[-26,176],[-24,174],[-22,172],[-20,170],[-18,168],[-18,164],[-18,160],[-18,156],[-16,152],[-14,148],[-12,144],[-12,140],[-12,136] ]},
   { name: "Greenland", points: [
     [76,-18],[78,-22],[80,-28],[82,-34],[82,-40],[82,-46],[82,-52],[82,-58],[80,-62],[78,-64],[76,-66],[74,-64],[72,-60],[70,-56],[68,-52],[66,-48],[64,-44],[62,-40],[62,-36],[64,-32],[66,-28],[68,-24],[70,-20],[72,-16] ]},
+];
+
+const CITIES: { name: string; lat: number; lng: number }[] = [
+  { name: "New York", lat: 40.7, lng: -74 },
+  { name: "London", lat: 51.5, lng: -0.1 },
+  { name: "Tokyo", lat: 35.7, lng: 139.7 },
+  { name: "Sydney", lat: -33.9, lng: 151.2 },
+  { name: "São Paulo", lat: -23.5, lng: -46.6 },
+  { name: "Dubai", lat: 25.2, lng: 55.3 },
+  { name: "Singapore", lat: 1.3, lng: 103.8 },
+  { name: "San Francisco", lat: 37.8, lng: -122.4 },
+  { name: "Berlin", lat: 52.5, lng: 13.4 },
+  { name: "Mumbai", lat: 19.1, lng: 72.9 },
+  { name: "Cape Town", lat: -33.9, lng: 18.4 },
+  { name: "Seoul", lat: 37.6, lng: 127 },
+  { name: "Lagos", lat: 6.5, lng: 3.4 },
+  { name: "Mexico City", lat: 19.4, lng: -99.1 },
+  { name: "Moscow", lat: 55.8, lng: 37.6 },
+];
+
+const CONNECTIONS: [number, number][] = [
+  [0, 1], [1, 3], [1, 4], [0, 4], [2, 6], [2, 9], [2, 11],
+  [5, 9], [5, 12], [7, 0], [7, 1], [8, 1], [10, 12], [13, 0],
+  [14, 8], [3, 6], [9, 6],
 ];
 
 /* ─── 3D GLOBE SECTION ─── */
@@ -1010,6 +1034,7 @@ function GlobeSection() {
       rotY += velX;
       rotY += 0.003;
 
+
       const rotXAbs = rotX;
       const rotYAbs = rotY;
 
@@ -1037,12 +1062,12 @@ function GlobeSection() {
             const pp1 = wireframeProj[idx];
             const pp2 = wireframeProj[idx + 1];
             if (pp1.z > -r * 0.3 || pp2.z > -r * 0.3) {
-              const alpha = Math.max(0.08, (pp1.z / r + 1) * 0.12 + 0.06);
+              const alpha = Math.max(0.06, (pp1.z / r + 1) * 0.1 + 0.05);
               ctx2.beginPath();
               ctx2.moveTo(pp1.x, pp1.y);
               ctx2.lineTo(pp2.x, pp2.y);
               ctx2.strokeStyle = `rgba(167, 139, 250, ${alpha})`;
-              ctx2.lineWidth = 0.4;
+              ctx2.lineWidth = 0.3;
               ctx2.stroke();
             }
           }
@@ -1053,12 +1078,12 @@ function GlobeSection() {
             const pp1 = wireframeProj[idx];
             const pp2 = wireframeProj[(i + 1) * (lngSteps + 1) + j];
             if (pp1.z > -r * 0.3 || pp2.z > -r * 0.3) {
-              const alpha = Math.max(0.08, (pp1.z / r + 1) * 0.12 + 0.06);
+              const alpha = Math.max(0.06, (pp1.z / r + 1) * 0.1 + 0.05);
               ctx2.beginPath();
               ctx2.moveTo(pp1.x, pp1.y);
               ctx2.lineTo(pp2.x, pp2.y);
               ctx2.strokeStyle = `rgba(139, 92, 246, ${alpha})`;
-              ctx2.lineWidth = 0.4;
+              ctx2.lineWidth = 0.3;
               ctx2.stroke();
             }
           }
@@ -1085,26 +1110,104 @@ function GlobeSection() {
             }
             ctx2.closePath();
             const depth = (avgZ / r + 1) * 0.5;
-            const alpha = Math.max(0.25, Math.min(0.55, depth * 0.45 + 0.15));
-            const bright = Math.max(0.15, Math.min(0.4, depth * 0.35 + 0.1));
+            const alpha = Math.max(0.3, Math.min(0.6, depth * 0.5 + 0.2));
+            const bright = Math.max(0.15, Math.min(0.45, depth * 0.4 + 0.1));
             ctx2.fillStyle = `rgba(${99 + 50 * bright}, ${70 + 30 * bright}, ${220 + 20 * bright}, ${alpha})`;
             ctx2.fill();
-            ctx2.strokeStyle = `rgba(167, 139, 250, ${alpha * 0.4})`;
-            ctx2.lineWidth = 0.6;
+            ctx2.strokeStyle = `rgba(167, 139, 250, ${alpha * 0.3})`;
+            ctx2.lineWidth = 0.5;
             ctx2.stroke();
           }
         }
       }
 
+      function drawConnections(ctx2: CanvasRenderingContext2D) {
+        const city3D = CITIES.map((c) => {
+          const rad = r * 1.002;
+          return latLngTo3D(c.lat, c.lng, rad);
+        });
+
+        for (const [i, j] of CONNECTIONS) {
+          const p1 = proj3D(city3D[i]);
+          const p2 = proj3D(city3D[j]);
+          if (p1.z < -r * 0.1 || p2.z < -r * 0.1) continue;
+
+          const steps = 30;
+          ctx2.beginPath();
+          let started = false;
+          for (let s = 0; s <= steps; s++) {
+            const t = s / steps;
+            const mid = {
+              x: city3D[i].x + (city3D[j].x - city3D[i].x) * t,
+              y: city3D[i].y + (city3D[j].y - city3D[i].y) * t,
+              z: city3D[i].z + (city3D[j].z - city3D[i].z) * t,
+            };
+            const bulge = Math.sin(t * Math.PI) * r * 0.25;
+            mid.y += bulge;
+            const proj = proj3D(mid);
+            if (!started) { ctx2.moveTo(proj.x, proj.y); started = true; }
+            else ctx2.lineTo(proj.x, proj.y);
+          }
+          const avgZ = (p1.z + p2.z) / 2;
+          const alpha = Math.max(0.04, (avgZ / r + 1) * 0.06);
+          ctx2.strokeStyle = `rgba(167, 139, 250, ${alpha})`;
+          ctx2.lineWidth = 0.5;
+          ctx2.stroke();
+        }
+      }
+
+      function drawCities(ctx2: CanvasRenderingContext2D) {
+        const city3D = CITIES.map((c) => {
+          const rad = r * 1.002;
+          return latLngTo3D(c.lat, c.lng, rad);
+        });
+
+        for (let i = 0; i < CITIES.length; i++) {
+          const proj = proj3D(city3D[i]);
+          if (proj.z < -r * 0.1) continue;
+          const depth = (proj.z / r + 1) * 0.5;
+          const alpha = Math.max(0.25, depth * 0.7);
+
+          const size = 2 + depth * 2;
+          ctx2.beginPath();
+          ctx2.arc(proj.x, proj.y, size, 0, Math.PI * 2);
+          ctx2.fillStyle = `rgba(167, 139, 250, ${alpha})`;
+          ctx2.fill();
+
+          const glowSize = 6 + depth * 6;
+          const g = ctx2.createRadialGradient(proj.x, proj.y, 0, proj.x, proj.y, glowSize);
+          g.addColorStop(0, `rgba(167, 139, 250, ${alpha * 0.5})`);
+          g.addColorStop(1, "transparent");
+          ctx2.fillStyle = g;
+          ctx2.beginPath();
+          ctx2.arc(proj.x, proj.y, glowSize, 0, Math.PI * 2);
+          ctx2.fill();
+        }
+      }
+
       drawContinents(ctx);
+      drawConnections(ctx);
+      drawCities(ctx);
       drawWireframe(ctx);
 
-      const glow = ctx.createRadialGradient(cx, cy, r * 0.5, cx, cy, r * 1.4);
-      glow.addColorStop(0, "rgba(99, 102, 241, 0.04)");
-      glow.addColorStop(0.3, "rgba(139, 92, 246, 0.03)");
+      const glow = ctx.createRadialGradient(cx, cy, r * 0.6, cx, cy, r * 1.4);
+      glow.addColorStop(0, "rgba(99, 102, 241, 0.03)");
+      glow.addColorStop(0.3, "rgba(139, 92, 246, 0.02)");
       glow.addColorStop(1, "transparent");
       ctx.fillStyle = glow;
       ctx.fillRect(0, 0, w, h);
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.02, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(167, 139, 250, 0.04)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.06, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(99, 102, 241, 0.02)";
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
 
       animId = requestAnimationFrame(draw);
     };
