@@ -890,6 +890,24 @@ function ScannerLine() {
   );
 }
 
+/* ─── CONTINENT OUTLINES ─── */
+const CONTINENTS: { name: string; points: [number, number][] }[] = [
+  { name: "North America", points: [
+    [52,-128],[48,-124],[42,-124],[36,-120],[32,-116],[28,-112],[25,-108],[22,-104],[20,-100],[18,-96],[16,-92],[14,-88],[12,-84],[10,-80],[10,-76],[12,-72],[15,-68],[18,-64],[22,-70],[25,-75],[28,-80],[30,-85],[34,-78],[38,-76],[42,-72],[46,-66],[50,-56],[54,-58],[58,-64],[62,-70],[66,-78],[68,-86],[70,-94],[70,-102],[70,-110],[70,-118],[70,-126],[68,-134],[64,-140],[60,-146],[56,-136],[52,-130] ]},
+  { name: "South America", points: [
+    [10,-76],[12,-72],[12,-68],[10,-62],[8,-56],[5,-52],[2,-50],[0,-50],[-2,-48],[-5,-36],[-8,-36],[-12,-38],[-16,-40],[-20,-42],[-24,-44],[-28,-48],[-32,-52],[-36,-56],[-40,-60],[-44,-64],[-48,-68],[-52,-70],[-55,-66],[-54,-62],[-50,-72],[-46,-74],[-42,-76],[-38,-72],[-34,-70],[-30,-68],[-26,-68],[-22,-66],[-18,-62],[-14,-58],[-10,-64],[-6,-72],[-2,-76],[2,-78],[6,-76],[8,-76] ]},
+  { name: "Europe", points: [
+    [36,-6],[38,-4],[40,-2],[42,-4],[44,-2],[46,-2],[48,-4],[50,-2],[52,-2],[54,-2],[56,-4],[58,-4],[60,-4],[62,-6],[64,-10],[66,-14],[68,-18],[70,-22],[70,-26],[70,-30],[68,-28],[66,-26],[64,-24],[62,-22],[60,-26],[58,-30],[56,-34],[54,-36],[52,-40],[50,-38],[48,-36],[46,-32],[44,-28],[42,-24],[40,-20],[38,-16] ]},
+  { name: "Africa", points: [
+    [36,-4],[36,0],[36,4],[34,8],[32,12],[30,16],[28,20],[26,24],[24,28],[22,32],[20,36],[18,38],[16,40],[14,42],[12,42],[10,42],[8,42],[6,42],[4,42],[2,42],[0,42],[-2,42],[-4,42],[-6,40],[-8,38],[-10,40],[-12,40],[-14,38],[-16,36],[-18,36],[-20,36],[-22,34],[-24,34],[-26,32],[-28,30],[-30,28],[-32,22],[-34,18],[-34,14],[-32,10],[-30,8],[-28,12],[-26,14],[-24,14],[-22,14],[-20,12],[-18,12],[-16,10],[-14,8],[-12,6],[-10,4],[-8,2],[-6,2],[-4,2],[-2,2],[0,4],[2,4],[4,4],[6,2],[8,0],[10,-4],[12,-8],[14,-12],[16,-14],[18,-14],[20,-16],[22,-16],[24,-14],[26,-12],[28,-10],[30,-8],[32,-6] ]},
+  { name: "Asia", points: [
+    [70,-24],[72,-30],[74,-36],[74,-44],[74,-52],[74,-60],[74,-68],[74,-76],[74,-84],[74,-92],[74,-100],[74,-108],[74,-116],[74,-124],[74,-132],[74,-140],[74,-148],[74,-156],[74,-164],[72,-170],[70,-174],[68,-178],[64,-176],[60,-174],[56,-136],[52,-132],[48,-130],[44,-132],[40,-128],[36,-124],[32,-120],[28,-118],[24,-114],[20,-108],[16,-104],[12,-100],[8,-96],[4,-92],[2,-88],[0,-84],[-2,-80],[-4,-76],[-6,-72],[-4,-68],[0,-64],[4,-60],[8,-56],[12,-52],[16,-48],[20,-44],[24,-40],[28,-36],[32,-32],[36,-28],[38,-24],[40,-20],[42,-16],[44,-18],[46,-22],[48,-26],[50,-28],[52,-30],[54,-32],[56,-34],[58,-32],[60,-28],[62,-24],[64,-22],[66,-20],[68,-22] ]},
+  { name: "Australia", points: [
+    [-12,130],[-12,134],[-14,138],[-16,140],[-18,142],[-20,144],[-22,146],[-24,148],[-26,150],[-28,152],[-30,154],[-32,156],[-34,158],[-36,160],[-38,162],[-40,164],[-42,166],[-42,170],[-40,172],[-38,174],[-36,176],[-34,178],[-32,180],[-30,180],[-28,178],[-26,176],[-24,174],[-22,172],[-20,170],[-18,168],[-18,164],[-18,160],[-18,156],[-16,152],[-14,148],[-12,144],[-12,140],[-12,136] ]},
+  { name: "Greenland", points: [
+    [76,-18],[78,-22],[80,-28],[82,-34],[82,-40],[82,-46],[82,-52],[82,-58],[80,-62],[78,-64],[76,-66],[74,-64],[72,-60],[70,-56],[68,-52],[66,-48],[64,-44],[62,-40],[62,-36],[64,-32],[66,-28],[68,-24],[70,-20],[72,-16] ]},
+];
+
 /* ─── 3D GLOBE SECTION ─── */
 function GlobeSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -903,9 +921,12 @@ function GlobeSection() {
     if (!ctx) return;
 
     let animId: number;
-    let mouse = { x: 0.5, y: 0.5 };
+    let velY = 0;
+    let velX = 0;
     let rotX = 0.4;
     let rotY = 0;
+    let prevMouse = { x: 0, y: 0 };
+    let mouseActive = false;
 
     const resize = () => {
       const rect = section.getBoundingClientRect();
@@ -920,22 +941,37 @@ function GlobeSection() {
     const observer = new ResizeObserver(resize);
     observer.observe(section);
 
-    const onMouse = (e: MouseEvent) => {
+    const onMouseDown = () => { mouseActive = true; };
+    const onMouseUp = () => { mouseActive = false; };
+    const onMouseLeave = () => { mouseActive = false; };
+
+    const onMouseMove = (e: MouseEvent) => {
       const rect = section.getBoundingClientRect();
-      mouse.x = (e.clientX - rect.left) / rect.width;
-      mouse.y = (e.clientY - rect.top) / rect.height;
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      if (mouseActive && mx >= 0 && my >= 0 && mx <= rect.width && my <= rect.height) {
+        const dx = mx - prevMouse.x;
+        const dy = my - prevMouse.y;
+        velY += dy * 0.008;
+        velX += dx * 0.008;
+      }
+      prevMouse = { x: mx, y: my };
     };
-    window.addEventListener("mousemove", onMouse);
 
-    const latSteps = 20;
-    const lngSteps = 28;
-    const points: { theta: number; phi: number }[] = [];
+    section.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("mouseup", onMouseUp);
+    section.addEventListener("mouseleave", onMouseLeave);
+    section.addEventListener("mousemove", onMouseMove);
 
+    const latSteps = 22;
+    const lngSteps = 30;
+    const wireframe: { theta: number; phi: number }[] = [];
     for (let i = 0; i <= latSteps; i++) {
       const theta = (i / latSteps) * Math.PI;
       for (let j = 0; j <= lngSteps; j++) {
         const phi = (j / lngSteps) * Math.PI * 2;
-        points.push({ theta, phi });
+        wireframe.push({ theta, phi });
       }
     }
 
@@ -949,79 +985,123 @@ function GlobeSection() {
       return { x: p.x * c + p.z * s, y: p.y, z: -p.x * s + p.z * c };
     }
 
+    function latLngTo3D(lat: number, lng: number, radius: number) {
+      const theta = (90 - lat) * Math.PI / 180;
+      const phi = lng * Math.PI / 180;
+      return {
+        x: radius * Math.sin(theta) * Math.cos(phi),
+        y: radius * Math.cos(theta),
+        z: radius * Math.sin(theta) * Math.sin(phi),
+      };
+    }
+
     const draw = () => {
       const w = canvas.width;
       const h = canvas.height;
       ctx.clearRect(0, 0, w, h);
 
-      const cx = w * 0.5;
-      const cy = h * 0.52;
-      const r = Math.min(w, h) * 0.3;
+      const cx = w * 0.48;
+      const cy = h * 0.5;
+      const r = Math.min(w, h) * 0.38;
 
-      const targetRotY = (mouse.x - 0.5) * 1.5;
-      const targetRotX = 0.4 + (mouse.y - 0.5) * -0.8;
-      rotY += (targetRotY - rotY) * 0.04;
-      rotX += (targetRotX - rotX) * 0.04;
-      rotY += 0.004;
+      velX *= 0.97;
+      velY *= 0.97;
+      rotX += velY;
+      rotY += velX;
+      rotY += 0.003;
 
-      const projected: { x: number; y: number; z: number }[] = [];
+      const rotXAbs = rotX;
+      const rotYAbs = rotY;
 
-      for (const p of points) {
-        let pos = {
-          x: r * Math.sin(p.theta) * Math.cos(p.phi),
-          y: r * Math.cos(p.theta),
-          z: r * Math.sin(p.theta) * Math.sin(p.phi),
+      const proj3D = (p: { x: number; y: number; z: number }) => {
+        let pos = rotateX(p, rotXAbs);
+        pos = rotateY(pos, rotYAbs);
+        const persp = 500 / (500 + pos.z);
+        return { x: cx + pos.x * persp, y: cy + pos.y * persp, z: pos.z };
+      };
+
+      const wireframeProj = wireframe.map((p) => {
+        const rad = r;
+        const pos = {
+          x: rad * Math.sin(p.theta) * Math.cos(p.phi),
+          y: rad * Math.cos(p.theta),
+          z: rad * Math.sin(p.theta) * Math.sin(p.phi),
         };
-        pos = rotateX(pos, rotX);
-        pos = rotateY(pos, rotY);
+        return proj3D(pos);
+      });
 
-        const perspective = 500 / (500 + pos.z);
-        projected.push({
-          x: cx + pos.x * perspective,
-          y: cy + pos.y * perspective,
-          z: pos.z,
-        });
-      }
-
-      for (let i = 0; i <= latSteps; i++) {
-        for (let j = 0; j < lngSteps; j++) {
-          const idx = i * (lngSteps + 1) + j;
-          const idxNext = idx + 1;
-          const p1 = projected[idx];
-          const p2 = projected[idxNext];
-          if (p1.z > -r * 0.3 || p2.z > -r * 0.3) {
-            const alpha = Math.max(0.15, (p1.z / r + 1) * 0.35 + 0.1);
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(139, 92, 246, ${alpha})`;
-            ctx.lineWidth = 1.2;
-            ctx.stroke();
+      function drawWireframe(ctx2: CanvasRenderingContext2D) {
+        for (let i = 0; i <= latSteps; i++) {
+          for (let j = 0; j < lngSteps; j++) {
+            const idx = i * (lngSteps + 1) + j;
+            const pp1 = wireframeProj[idx];
+            const pp2 = wireframeProj[idx + 1];
+            if (pp1.z > -r * 0.3 || pp2.z > -r * 0.3) {
+              const alpha = Math.max(0.08, (pp1.z / r + 1) * 0.12 + 0.06);
+              ctx2.beginPath();
+              ctx2.moveTo(pp1.x, pp1.y);
+              ctx2.lineTo(pp2.x, pp2.y);
+              ctx2.strokeStyle = `rgba(167, 139, 250, ${alpha})`;
+              ctx2.lineWidth = 0.4;
+              ctx2.stroke();
+            }
+          }
+        }
+        for (let j = 0; j <= lngSteps; j++) {
+          for (let i = 0; i < latSteps; i++) {
+            const idx = i * (lngSteps + 1) + j;
+            const pp1 = wireframeProj[idx];
+            const pp2 = wireframeProj[(i + 1) * (lngSteps + 1) + j];
+            if (pp1.z > -r * 0.3 || pp2.z > -r * 0.3) {
+              const alpha = Math.max(0.08, (pp1.z / r + 1) * 0.12 + 0.06);
+              ctx2.beginPath();
+              ctx2.moveTo(pp1.x, pp1.y);
+              ctx2.lineTo(pp2.x, pp2.y);
+              ctx2.strokeStyle = `rgba(139, 92, 246, ${alpha})`;
+              ctx2.lineWidth = 0.4;
+              ctx2.stroke();
+            }
           }
         }
       }
 
-      for (let j = 0; j <= lngSteps; j++) {
-        for (let i = 0; i < latSteps; i++) {
-          const idx = i * (lngSteps + 1) + j;
-          const idxNext = (i + 1) * (lngSteps + 1) + j;
-          const p1 = projected[idx];
-          const p2 = projected[idxNext];
-          if (p1.z > -r * 0.3 || p2.z > -r * 0.3) {
-            const alpha = Math.max(0.15, (p1.z / r + 1) * 0.35 + 0.1);
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(167, 139, 250, ${alpha})`;
-            ctx.lineWidth = 1.2;
-            ctx.stroke();
+      function drawContinents(ctx2: CanvasRenderingContext2D) {
+        for (const cont of CONTINENTS) {
+          const pts3D = cont.points.map(([lat, lng]) => {
+            const rad = r * 1.002;
+            return latLngTo3D(lat, lng, rad);
+          });
+
+          const projected = pts3D.map((p) => proj3D(p));
+          let avgZ = 0;
+          for (const p of projected) avgZ += p.z;
+          avgZ /= projected.length;
+
+          if (avgZ > -r * 0.2) {
+            ctx2.beginPath();
+            ctx2.moveTo(projected[0].x, projected[0].y);
+            for (let i = 1; i < projected.length; i++) {
+              ctx2.lineTo(projected[i].x, projected[i].y);
+            }
+            ctx2.closePath();
+            const depth = (avgZ / r + 1) * 0.5;
+            const alpha = Math.max(0.25, Math.min(0.55, depth * 0.45 + 0.15));
+            const bright = Math.max(0.15, Math.min(0.4, depth * 0.35 + 0.1));
+            ctx2.fillStyle = `rgba(${99 + 50 * bright}, ${70 + 30 * bright}, ${220 + 20 * bright}, ${alpha})`;
+            ctx2.fill();
+            ctx2.strokeStyle = `rgba(167, 139, 250, ${alpha * 0.4})`;
+            ctx2.lineWidth = 0.6;
+            ctx2.stroke();
           }
         }
       }
 
-      const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 1.2);
-      glow.addColorStop(0, "rgba(99, 102, 241, 0.08)");
-      glow.addColorStop(0.4, "rgba(139, 92, 246, 0.04)");
+      drawContinents(ctx);
+      drawWireframe(ctx);
+
+      const glow = ctx.createRadialGradient(cx, cy, r * 0.5, cx, cy, r * 1.4);
+      glow.addColorStop(0, "rgba(99, 102, 241, 0.04)");
+      glow.addColorStop(0.3, "rgba(139, 92, 246, 0.03)");
       glow.addColorStop(1, "transparent");
       ctx.fillStyle = glow;
       ctx.fillRect(0, 0, w, h);
@@ -1034,41 +1114,81 @@ function GlobeSection() {
       cancelAnimationFrame(animId);
       observer.disconnect();
       window.removeEventListener("resize", resize);
-      window.removeEventListener("mousemove", onMouse);
+      section.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("mouseup", onMouseUp);
+      section.removeEventListener("mouseleave", onMouseLeave);
+      section.removeEventListener("mousemove", onMouseMove);
     };
   }, []);
 
+  const globeStats = [
+    { value: "200+", label: "Countries supported" },
+    { value: "48ms", label: "Avg. latency" },
+    { value: "99.9%", label: "Uptime SLA" },
+  ];
+
   return (
-    <section className="py-24 px-6 relative overflow-hidden" style={{ zIndex: 1 }}>
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-12" data-reveal="fade-up">
+    <section className="py-20 px-6 relative overflow-hidden" style={{ zIndex: 1 }}>
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-10" data-reveal="fade-up">
           <div className="flex justify-center mb-6">
-            <div className="section-tag pulse-soft">3D Interactive</div>
+            <div className="section-tag pulse-soft">3D Interactive Globe</div>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
-            Global <span className="gradient-text">Reach</span>
+            Global <span className="gradient-text">Infrastructure</span>
           </h2>
-          <p className="text-lg mt-4" style={{ color: "var(--text-quaternary)" }}>
-            Deployed worldwide. Built for any market.
+          <p className="text-lg mt-3" style={{ color: "var(--text-quaternary)" }}>
+            Drag the globe. Deployed everywhere.
           </p>
         </div>
-        <div
-          ref={sectionRef}
-          className="glass-card-gradient relative overflow-hidden"
-          style={{ height: "420px", padding: 0 }}
-          data-card-spotlight
-        >
-          <div className="mesh-bg absolute inset-0 pointer-events-none" />
-          <canvas
-            ref={canvasRef}
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              pointerEvents: "none",
-            }}
-          />
+        <div className="grid md:grid-cols-5 gap-6 items-stretch">
+          <div
+            className="md:col-span-3 glass-card-gradient relative overflow-hidden"
+            style={{ height: "460px", padding: 0, cursor: "grab" }}
+            data-card-spotlight
+            ref={sectionRef}
+          >
+            <div className="mesh-bg absolute inset-0 pointer-events-none" />
+            <canvas
+              ref={canvasRef}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                pointerEvents: "none",
+              }}
+            />
+          </div>
+          <div className="md:col-span-2 flex flex-col gap-4">
+            {globeStats.map((stat, i) => (
+              <div
+                key={i}
+                className="glass-card-heavy flex-1 flex flex-col items-center justify-center p-6 text-center"
+                data-tilt
+                data-reveal="fade-right"
+                data-card-spotlight
+                style={{ transitionDelay: `${i * 0.08}s` }}
+              >
+                <p className="text-3xl md:text-4xl font-bold gradient-text mb-2">{stat.value}</p>
+                <p className="text-sm" style={{ color: "var(--text-quaternary)" }}>{stat.label}</p>
+              </div>
+            ))}
+            <div
+              className="glass-card-heavy flex flex-col items-center justify-center p-6 text-center"
+              data-tilt
+              data-reveal="fade-right"
+              data-card-spotlight
+              style={{ transitionDelay: "0.24s" }}
+            >
+              <p className="text-sm font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
+                Powered by NEON-CORE
+              </p>
+              <p className="text-xs" style={{ color: "var(--text-faint)" }}>
+                Click & drag to explore
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
