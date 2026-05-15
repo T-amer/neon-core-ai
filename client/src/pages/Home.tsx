@@ -4,7 +4,8 @@ import { NeonButton } from "@/components/NeonButton";
 import { CodePreview } from "@/components/CodePreview";
 import { PricingCard } from "@/components/PricingCard";
 import { AIChatBox, Message } from "@/components/AIChatBox";
-import { Loader2, Star, Shield, Clock, Check, ChevronDown, Menu, X, ArrowRight, Zap, Sparkles, ChevronUp } from "lucide-react";
+import { Loader2, Star, Shield, Clock, Check, ChevronDown, Menu, X, ArrowRight, Zap, Sparkles, ChevronUp, Sun, Moon } from "lucide-react";
+import { useTheme } from "../contexts/ThemeContext";
 
 const styles = `
 *, *::before, *::after { box-sizing: border-box; }
@@ -207,27 +208,31 @@ const styles = `
 }
 
 .glass-btn {
-  background: rgba(255,255,255,0.5);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--card-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(99,102,241,0.2);
+  border: 1px solid var(--card-border-accent);
   border-radius: 12px;
   padding: 14px 28px;
   font-weight: 600;
   font-size: 15px;
-  color: #6366f1;
+  color: var(--primary);
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
 }
 .glass-btn:hover {
-  background: rgba(99,102,241,0.1);
+  background: var(--accent-bg);
   border-color: rgba(99,102,241,0.3);
   box-shadow: 0 4px 20px rgba(99,102,241,0.12);
   transform: translateY(-1px);
 }
-.glass-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.glass-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
 .glass-btn .ripple-effect {
   position: absolute;
   border-radius: 50%;
@@ -724,6 +729,125 @@ function Counter({ to, prefix = "", suffix = "", label }: { to: number; prefix?:
   );
 }
 
+/* ─── THEME TOGGLE ─── */
+function ThemeToggleButton() {
+  const { theme, toggleTheme } = useTheme();
+  if (!toggleTheme) return null;
+  return (
+    <button
+      onClick={toggleTheme}
+      className="p-2 rounded-xl transition-all duration-300"
+      style={{
+        background: "var(--bg-faint)",
+        border: "1px solid var(--border-faint)",
+        color: "var(--text-tertiary)",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = "var(--accent-bg)";
+        e.currentTarget.style.color = "var(--primary)";
+        e.currentTarget.style.borderColor = "var(--card-border-accent)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = "var(--bg-faint)";
+        e.currentTarget.style.color = "var(--text-tertiary)";
+        e.currentTarget.style.borderColor = "var(--border-faint)";
+      }}
+      aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
+    >
+      {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
+    </button>
+  );
+}
+
+/* ─── CONFETTI ─── */
+function ConfettiCanvas({ fire, originX = 0.5, originY = 0.5 }: { fire: number; originX?: number; originY?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (!fire) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const colors = ["#6366f1", "#8b5cf6", "#a78bfa", "#f59e0b", "#ef4444", "#10b981", "#3b82f6", "#ec4899"];
+    const cx = canvas.width * originX;
+    const cy = canvas.height * originY;
+    const count = 120;
+    const particles: { x: number; y: number; vx: number; vy: number; size: number; color: string; life: number; maxLife: number; rotation: number; rotSpeed: number }[] = [];
+
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 3 + Math.random() * 8;
+      particles.push({
+        x: cx,
+        y: cy,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 4,
+        size: 4 + Math.random() * 6,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        life: 0,
+        maxLife: 60 + Math.random() * 60,
+        rotation: Math.random() * 360,
+        rotSpeed: (Math.random() - 0.5) * 10,
+      });
+    }
+
+    let animId: number;
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let alive = false;
+      for (const p of particles) {
+        if (p.life < p.maxLife) {
+          alive = true;
+          p.life++;
+          p.vy += 0.12;
+          p.vx *= 0.99;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rotation += p.rotSpeed;
+          const alpha = 1 - p.life / p.maxLife;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+          ctx.restore();
+        }
+      }
+      if (alive) animId = requestAnimationFrame(animate);
+    };
+    animate();
+
+    return () => { if (animId) cancelAnimationFrame(animId); };
+  }, [fire, originX, originY]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ position: "fixed", inset: 0, zIndex: 99999, pointerEvents: "none" }}
+    />
+  );
+}
+
+function useMouseGlow() {
+  const [glowPos, setGlowPos] = useState({ x: -999, y: -999 });
+  useEffect(() => {
+    const handler = (e: MouseEvent) => setGlowPos({ x: e.clientX, y: e.clientY });
+    window.addEventListener("mousemove", handler);
+    return () => window.removeEventListener("mousemove", handler);
+  }, []);
+  return glowPos;
+}
+
 /* ─── MAIN ─── */
 export default function Home() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -745,6 +869,7 @@ export default function Home() {
   const [chatMessages, setChatMessages] = useState<Message[]>([
     { role: "system", content: "You are NEON-CORE AI, a SaaS architecture expert." },
   ]);
+  const [confettiTrigger, setConfettiTrigger] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLDivElement>(null);
   const heroCardRef = useRef<HTMLDivElement>(null);
@@ -781,7 +906,7 @@ export default function Home() {
   /* ─── MAGNETIC BUTTONS ─── */
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
-      const btns = document.querySelectorAll<HTMLElement>(".glass-btn");
+      const btns = document.querySelectorAll<HTMLButtonElement>(".glass-btn");
       for (const btn of btns) {
         if (btn.disabled) continue;
         const rect = btn.getBoundingClientRect();
@@ -1003,6 +1128,10 @@ export default function Home() {
               </button>
             ))}
           </div>
+          <div className="flex items-center gap-2">
+          <div className="hidden md:block">
+            <ThemeToggleButton />
+          </div>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="md:hidden p-2"
@@ -1023,8 +1152,12 @@ export default function Home() {
                 {link.label}
               </button>
             ))}
+            <div className="pt-2">
+              <ThemeToggleButton />
+            </div>
           </div>
         )}
+        </div>
       </nav>
 
       {/* HERO */}
@@ -1118,7 +1251,7 @@ export default function Home() {
                   className="glass-input"
                 />
                 <button
-                  onClick={(e) => { addRipple(e); handleGenerate(); }}
+                  onClick={(e) => { addRipple(e); handleGenerate(); setConfettiTrigger(t => t + 1); }}
                   disabled={isGenerating}
                   className="glass-btn whitespace-nowrap"
                 >
@@ -1527,7 +1660,7 @@ export default function Home() {
                   className="glass-input"
                 />
                 <button
-                  onClick={(e) => { addRipple(e); handleGenerate(); }}
+                  onClick={(e) => { addRipple(e); handleGenerate(); setConfettiTrigger(t => t + 1); }}
                   disabled={isGenerating}
                   className="glass-btn whitespace-nowrap"
                 >
@@ -1545,6 +1678,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* CONFETTI */}
+      <ConfettiCanvas fire={confettiTrigger} originX={0.5} originY={0.6} />
 
       {/* FOOTER */}
       <footer className="py-12 px-6 relative" style={{ zIndex: 1 }}>
