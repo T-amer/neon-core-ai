@@ -255,6 +255,11 @@
   50% { box-shadow: 0 0 40px rgba(99,102,241,0.12); }
 }
 
+@keyframes scan-down {
+  0% { top: -5%; }
+  100% { top: 105%; }
+}
+
 @layer components {
   .container {
     width: 100%;

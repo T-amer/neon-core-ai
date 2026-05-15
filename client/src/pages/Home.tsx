@@ -848,6 +848,194 @@ function useMouseGlow() {
   return glowPos;
 }
 
+/* ─── SCANNER LINE ─── */
+function ScannerLine() {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        left: 0,
+        right: 0,
+        height: "100%",
+        zIndex: 0,
+        pointerEvents: "none",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          height: "2px",
+          background: "linear-gradient(90deg, transparent, rgba(99,102,241,0.15), rgba(139,92,246,0.25), rgba(167,139,250,0.15), transparent)",
+          boxShadow: "0 0 12px rgba(99,102,241,0.08), 0 0 40px rgba(99,102,241,0.04)",
+          animation: "scan-down 8s linear infinite",
+          opacity: 0.7,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          left: "10%",
+          right: "10%",
+          height: "80px",
+          background: "linear-gradient(180deg, transparent, rgba(99,102,241,0.015), transparent)",
+          animation: "scan-down 8s linear infinite",
+          pointerEvents: "none",
+          opacity: 0.6,
+        }}
+      />
+    </div>
+  );
+}
+
+/* ─── FLOATING CODE SYMBOLS ─── */
+function FloatingCodeSymbols() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animId: number;
+    let mouse = { x: -9999, y: -9999 };
+    const symbols = ["{ }", "</>", "[]", "=>", "()", "/* */", "//", "#", "...", "->", "??", "||"];
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const onMouse = (e: MouseEvent) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    };
+    window.addEventListener("mousemove", onMouse);
+
+    const particles: {
+      x: number; y: number; vx: number; vy: number;
+      symbol: string; size: number; alpha: number; speed: number;
+    }[] = [];
+
+    for (let i = 0; i < 25; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.15,
+        vy: -(0.1 + Math.random() * 0.2),
+        symbol: symbols[Math.floor(Math.random() * symbols.length)],
+        size: 10 + Math.random() * 8,
+        alpha: 0.03 + Math.random() * 0.04,
+        speed: 0.15 + Math.random() * 0.25,
+      });
+    }
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (const p of particles) {
+        const dx = mouse.x - p.x;
+        const dy = mouse.y - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 150) {
+          const force = (150 - dist) / 150;
+          p.vx -= (dx / dist) * force * 0.4;
+          p.vy -= (dy / dist) * force * 0.4;
+        }
+
+        p.vx += (Math.random() - 0.5) * 0.02;
+        p.vy += (Math.random() - 0.5) * 0.01;
+        p.vy -= 0.002;
+
+        const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+        if (speed > 0.8) { p.vx = (p.vx / speed) * 0.8; p.vy = (p.vy / speed) * 0.8; }
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.y < -50) { p.y = canvas.height + 50; p.x = Math.random() * canvas.width; }
+        if (p.x < -100) p.x = canvas.width + 100;
+        if (p.x > canvas.width + 100) p.x = -100;
+
+        ctx.font = `${p.size}px "SF Mono", "Fira Code", monospace`;
+        ctx.fillStyle = `rgba(99, 102, 241, ${p.alpha})`;
+        ctx.textAlign = "center";
+        ctx.fillText(p.symbol, p.x, p.y);
+      }
+
+      animId = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("mousemove", onMouse);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: "fixed", inset: 0, zIndex: 0,
+        pointerEvents: "none", opacity: 0.7,
+      }}
+    />
+  );
+}
+
+/* ─── CARD SPOTLIGHT ─── */
+const cardSpotlightStyle = `
+[data-card-spotlight] {
+  position: relative;
+  overflow: hidden;
+}
+[data-card-spotlight]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(400px circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(99,102,241,0.04) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+[data-card-spotlight]:hover::before {
+  opacity: 1;
+}
+`;
+
+function useCardSpotlight() {
+  useEffect(() => {
+    const styleEl = document.createElement("style");
+    styleEl.textContent = cardSpotlightStyle;
+    document.head.appendChild(styleEl);
+
+    const onMove = (e: MouseEvent) => {
+      const cards = document.querySelectorAll<HTMLElement>("[data-card-spotlight]");
+      for (const card of cards) {
+        const rect = card.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        card.style.setProperty("--spot-x", `${x}%`);
+        card.style.setProperty("--spot-y", `${y}%`);
+      }
+    };
+    document.addEventListener("mousemove", onMove);
+    return () => {
+      document.removeEventListener("mousemove", onMove);
+      document.head.removeChild(styleEl);
+    };
+  }, []);
+}
+
 /* ─── MAIN ─── */
 export default function Home() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -875,6 +1063,7 @@ export default function Home() {
   const heroCardRef = useRef<HTMLDivElement>(null);
 
   useScrollReveal();
+  useCardSpotlight();
 
   /* ─── GLOBAL TILT ─── */
   useEffect(() => {
@@ -1097,6 +1286,12 @@ export default function Home() {
         <div style={{ position: "absolute", top: "65%", left: "12%", width: 350, height: 350, borderRadius: "50%", background: "radial-gradient(circle, rgba(99,102,241,0.03) 0%, transparent 70%)", animation: "float 7s ease-in-out infinite", animationDelay: "2s" }} />
       </div>
 
+      {/* FLOATING CODE SYMBOLS */}
+      <FloatingCodeSymbols />
+
+      {/* SCANNER LINE */}
+      <ScannerLine />
+
       {/* DOT PATTERN */}
       <div className="fixed inset-0 pointer-events-none z-0 dots-bg" />
 
@@ -1197,7 +1392,7 @@ export default function Home() {
         <div className="light-beam" style={{ left: "30%", animation: "ray-move-2 15s ease-in-out infinite 3s" }} />
 
         <div className="max-w-5xl mx-auto text-center relative" style={{ zIndex: 2 }}>
-          <div ref={heroCardRef} className="glass-card-gradient p-10 md:p-16 relative overflow-hidden" data-tilt>
+          <div ref={heroCardRef} className="glass-card-gradient p-10 md:p-16 relative overflow-hidden" data-tilt data-card-spotlight>
             <div className="hero-bg absolute inset-0 pointer-events-none mesh-bg" style={{ transition: "transform 0.1s ease-out" }} />
             <div className="shimmer-line absolute top-0 left-0 right-0 h-[1px]" />
             <ParticleCanvas isVisible={true} />
@@ -1282,7 +1477,7 @@ export default function Home() {
       {showPreview && (
         <section className="px-6 pb-24 -mt-16 relative" style={{ zIndex: 1 }}>
           <div className="max-w-4xl mx-auto" data-reveal="scale-in">
-            <div className="glass-card-heavy overflow-hidden glow-border">
+            <div className="glass-card-heavy overflow-hidden glow-border" data-card-spotlight>
               <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1px solid var(--border-faint)" }}>
                 <div className="w-3 h-3 rounded-full" style={{ background: "#FF5F56" }} />
                 <div className="w-3 h-3 rounded-full" style={{ background: "#FFBD2E" }} />
@@ -1325,7 +1520,7 @@ export default function Home() {
 
       {/* TRUST BAR (Marquee) */}
       <section className="py-20 px-6 relative" style={{ zIndex: 1 }}>
-        <div className="glass-card-heavy max-w-5xl mx-auto py-12 px-8 text-center">
+        <div className="glass-card-heavy max-w-5xl mx-auto py-12 px-8 text-center" data-card-spotlight>
           <p className="text-xs tracking-widest uppercase mb-8" style={{ color: "var(--text-faint)" }}>Trusted by founders and engineers at</p>
           <div className="marquee-track">
             <div className="marquee-content">
@@ -1358,7 +1553,7 @@ export default function Home() {
             </h2>
           </div>
           <div className="grid md:grid-cols-2 gap-8 items-stretch">
-            <div className="glass-card-heavy p-10" data-tilt data-reveal="fade-left" style={{ transitionDelay: "0.1s" }}>
+            <div className="glass-card-heavy p-10" data-tilt data-reveal="fade-left" data-card-spotlight style={{ transitionDelay: "0.1s" }}>
               <div className="section-tag" style={{ borderColor: "rgba(239,68,68,0.15)", background: "rgba(239,68,68,0.05)", color: "#ef4444" }}>
                 ✕ The Problem
               </div>
@@ -1380,7 +1575,7 @@ export default function Home() {
                 ))}
               </ul>
             </div>
-            <div className="glass-card-heavy p-10" data-tilt data-reveal="fade-right" style={{ transitionDelay: "0.2s" }}>
+            <div className="glass-card-heavy p-10" data-tilt data-reveal="fade-right" data-card-spotlight style={{ transitionDelay: "0.2s" }}>
               <div className="section-tag" style={{ borderColor: "rgba(5,150,105,0.15)", background: "rgba(5,150,105,0.05)", color: "#059669" }}>
                 ✓ The Solution
               </div>
@@ -1429,6 +1624,7 @@ export default function Home() {
                 className="glass-card-heavy p-8 group"
                 data-tilt
                 data-reveal="blur-in"
+                data-card-spotlight
                 style={{ transitionDelay: `${i * 0.08}s` }}
               >
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-lg transition-all duration-300 group-hover:scale-110 group-hover:rotate-3" style={{ background: "var(--accent-bg)" }}>
@@ -1465,6 +1661,7 @@ export default function Home() {
                 className="glass-card-heavy p-8"
                 data-tilt
                 data-reveal="fade-up"
+                data-card-spotlight
                 style={{ transitionDelay: `${i * 0.12}s` }}
               >
                 <div className="flex gap-1 mb-4">
@@ -1484,7 +1681,7 @@ export default function Home() {
           </div>
 
           {/* ROI */}
-          <div className="glass-card-heavy p-10 md:p-14 max-w-4xl mx-auto text-center" data-tilt>
+          <div className="glass-card-heavy p-10 md:p-14 max-w-4xl mx-auto text-center" data-tilt data-card-spotlight>
             <p className="text-xs tracking-widest mb-8" style={{ color: "var(--text-faint)" }}>ROI COMPARISON</p>
             <div className="grid md:grid-cols-3 gap-10">
               <Counter to={50} prefix="$" suffix="k" label="Average agency cost" />
@@ -1549,6 +1746,7 @@ export default function Home() {
           <div
             className="glass-card-gradient py-8 px-6 max-w-2xl mx-auto text-center"
             data-reveal="scale-in"
+            data-card-spotlight
           >
             <p className="text-sm" style={{ color: "var(--text-faint)" }}>
               <Shield size={14} className="inline mr-1" style={{ color: "#059669" }} /> 
@@ -1574,7 +1772,7 @@ export default function Home() {
               Describe your idea and get an instant architecture strategy.
             </p>
           </div>
-          <div className="glass-card-gradient overflow-hidden">
+          <div className="glass-card-gradient overflow-hidden" data-card-spotlight>
             <AIChatBox
               messages={chatMessages}
               onSendMessage={handleSendMessage}
@@ -1607,6 +1805,7 @@ export default function Home() {
                 className="glass-card-heavy overflow-hidden"
                 data-tilt
                 data-reveal="fade-up"
+                data-card-spotlight
                 style={{ transitionDelay: `${i * 0.06}s` }}
               >
                 <button
@@ -1639,7 +1838,7 @@ export default function Home() {
       {/* FINAL CTA */}
       <section className="py-20 px-6 relative" style={{ zIndex: 1 }}>
         <div className="max-w-4xl mx-auto" data-reveal="scale-in">
-          <div className="glass-card-gradient p-12 md:p-16 text-center relative overflow-hidden">
+          <div className="glass-card-gradient p-12 md:p-16 text-center relative overflow-hidden" data-card-spotlight>
             <div className="mesh-bg absolute inset-0 pointer-events-none" />
             <div className="shimmer-line absolute top-0 left-0 right-0 h-[1px]" />
             <div className="relative" style={{ zIndex: 1 }}>
@@ -1687,7 +1886,7 @@ export default function Home() {
 
       {/* FOOTER */}
       <footer className="py-12 px-6 relative" style={{ zIndex: 1 }}>
-        <div className="glass-card-heavy max-w-7xl mx-auto py-10 px-8 text-center">
+        <div className="glass-card-heavy max-w-7xl mx-auto py-10 px-8 text-center" data-card-spotlight>
           <div className="text-base font-bold tracking-tight mb-4">
             <span style={{ color: "#6366f1" }}>NEON</span><span style={{ color: "var(--text-quaternary)" }}>_CORE</span>
           </div>
