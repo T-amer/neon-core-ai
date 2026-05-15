@@ -21,6 +21,11 @@ const styles = `
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
+.shimmer-line {
+  background: linear-gradient(90deg, transparent, rgba(99,102,241,0.08), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
 @keyframes pulse-soft {
   0%, 100% { opacity: 0.6; }
   50% { opacity: 1; }
@@ -420,7 +425,7 @@ const styles = `
 /* Reveal animations staggered groups */
 [data-reveal] {
   opacity: 0;
-  transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: opacity 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 [data-reveal].revealed {
   opacity: 1;
@@ -1041,7 +1046,7 @@ export default function Home() {
         <div className="light-beam" style={{ left: "30%", animation: "ray-move-2 15s ease-in-out infinite 3s" }} />
 
         <div className="max-w-5xl mx-auto text-center relative" style={{ zIndex: 2 }}>
-          <div ref={heroCardRef} className="glass-card-gradient p-10 md:p-16 relative overflow-hidden">
+          <div ref={heroCardRef} className="glass-card-gradient p-10 md:p-16 relative overflow-hidden" data-tilt>
             <div className="hero-bg absolute inset-0 pointer-events-none mesh-bg" style={{ transition: "transform 0.1s ease-out" }} />
             <div className="shimmer-line absolute top-0 left-0 right-0 h-[1px]" />
             <ParticleCanvas isVisible={true} />
