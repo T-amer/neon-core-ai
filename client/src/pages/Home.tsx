@@ -890,6 +890,158 @@ function ScannerLine() {
   );
 }
 
+/* ─── 3D GLOBE ─── */
+function Globe3D() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animId: number;
+    let mouse = { x: 0.5, y: 0.5 };
+    let rotX = 0.3;
+    let rotY = 0;
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const onMouse = (e: MouseEvent) => {
+      mouse.x = e.clientX / window.innerWidth;
+      mouse.y = e.clientY / window.innerHeight;
+    };
+    window.addEventListener("mousemove", onMouse);
+
+    const latSteps = 18;
+    const lngSteps = 24;
+    const points: { theta: number; phi: number }[] = [];
+
+    for (let i = 0; i <= latSteps; i++) {
+      const theta = (i / latSteps) * Math.PI;
+      for (let j = 0; j <= lngSteps; j++) {
+        const phi = (j / lngSteps) * Math.PI * 2;
+        points.push({ theta, phi });
+      }
+    }
+
+    function rotateX(p: { x: number; y: number; z: number }, angle: number) {
+      const c = Math.cos(angle), s = Math.sin(angle);
+      return { x: p.x, y: p.y * c - p.z * s, z: p.y * s + p.z * c };
+    }
+
+    function rotateY(p: { x: number; y: number; z: number }, angle: number) {
+      const c = Math.cos(angle), s = Math.sin(angle);
+      return { x: p.x * c + p.z * s, y: p.y, z: -p.x * s + p.z * c };
+    }
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const cx = canvas.width * 0.5;
+      const cy = canvas.height * 0.82;
+      const maxR = Math.min(canvas.width, canvas.height) * 0.18;
+      const r = Math.min(maxR, 160);
+
+      const targetRotY = (mouse.x - 0.5) * 1.2;
+      const targetRotX = 0.3 + (mouse.y - 0.5) * -0.6;
+      rotY += (targetRotY - rotY) * 0.03;
+      rotX += (targetRotX - rotX) * 0.03;
+      rotY += 0.003;
+
+      const projected: { x: number; y: number; z: number }[] = [];
+
+      for (const p of points) {
+        const rad = r;
+        let pos = {
+          x: rad * Math.sin(p.theta) * Math.cos(p.phi),
+          y: rad * Math.cos(p.theta),
+          z: rad * Math.sin(p.theta) * Math.sin(p.phi),
+        };
+        pos = rotateX(pos, rotX);
+        pos = rotateY(pos, rotY);
+
+        const perspective = 600 / (600 + pos.z);
+        projected.push({
+          x: cx + pos.x * perspective,
+          y: cy + pos.y * perspective,
+          z: pos.z,
+        });
+      }
+
+      for (let i = 0; i <= latSteps; i++) {
+        for (let j = 0; j < lngSteps; j++) {
+          const idx = i * (lngSteps + 1) + j;
+          const idxNext = idx + 1;
+          const p1 = projected[idx];
+          const p2 = projected[idxNext];
+          if (p1.z > 0 || p2.z > 0) {
+            const alpha = Math.max(0, (p1.z / r + 1) * 0.08 + 0.02);
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = `rgba(139, 92, 246, ${alpha})`;
+            ctx.lineWidth = 0.6;
+            ctx.stroke();
+          }
+        }
+      }
+
+      for (let j = 0; j <= lngSteps; j++) {
+        for (let i = 0; i < latSteps; i++) {
+          const idx = i * (lngSteps + 1) + j;
+          const idxNext = (i + 1) * (lngSteps + 1) + j;
+          const p1 = projected[idx];
+          const p2 = projected[idxNext];
+          if (p1.z > 0 || p2.z > 0) {
+            const alpha = Math.max(0, (p1.z / r + 1) * 0.08 + 0.02);
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = `rgba(167, 139, 250, ${alpha})`;
+            ctx.lineWidth = 0.6;
+            ctx.stroke();
+          }
+        }
+      }
+
+      const glowAlpha = 0.03 + (1 - Math.abs(mouse.y - 0.5) * 2) * 0.02;
+      const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 1.5);
+      glow.addColorStop(0, `rgba(99, 102, 241, ${glowAlpha})`);
+      glow.addColorStop(0.5, `rgba(139, 92, 246, ${glowAlpha * 0.5})`);
+      glow.addColorStop(1, "transparent");
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      animId = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("mousemove", onMouse);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 0,
+        pointerEvents: "none",
+      }}
+    />
+  );
+}
+
 /* ─── FLOATING CODE SYMBOLS ─── */
 function FloatingCodeSymbols() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -1291,6 +1443,9 @@ export default function Home() {
 
       {/* SCANNER LINE */}
       <ScannerLine />
+
+      {/* 3D GLOBE */}
+      <Globe3D />
 
       {/* DOT PATTERN */}
       <div className="fixed inset-0 pointer-events-none z-0 dots-bg" />
