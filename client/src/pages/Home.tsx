@@ -1682,6 +1682,9 @@ export default function Home() {
       {/* CONFETTI */}
       <ConfettiCanvas fire={confettiTrigger} originX={0.5} originY={0.6} />
 
+      {/* NEON GRID */}
+      <NeonGrid />
+
       {/* FOOTER */}
       <footer className="py-12 px-6 relative" style={{ zIndex: 1 }}>
         <div className="glass-card-heavy max-w-7xl mx-auto py-10 px-8 text-center">
@@ -1694,6 +1697,99 @@ export default function Home() {
         </div>
       </footer>
     </div>
+  );
+}
+
+/* ─── NEON GRID ─── */
+function NeonGrid() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animId: number;
+    let mouse = { x: -9999, y: -9999 };
+    let time = 0;
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const onMouse = (e: MouseEvent) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    };
+    window.addEventListener("mousemove", onMouse);
+
+    const draw = () => {
+      time += 0.005;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const w = canvas.width;
+      const h = canvas.height;
+      const spacing = 48;
+      const cols = Math.floor(w / spacing) + 1;
+      const rows = Math.floor(h / spacing) + 1;
+
+      for (let r = 0; r < rows - 1; r++) {
+        for (let c = 0; c < cols - 1; c++) {
+          const x1 = c * spacing;
+          const y1 = r * spacing;
+          const x2 = (c + 1) * spacing;
+          const y2 = r * spacing;
+          const x3 = c * spacing;
+          const y3 = (r + 1) * spacing;
+
+          const dx = x1 - mouse.x;
+          const dy = y1 - mouse.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const wave = Math.sin(x1 * 0.02 + time) * 4 + Math.sin(y1 * 0.03 + time * 1.3) * 3;
+          const mouseInfluence = Math.max(0, 1 - dist / 300);
+          const offset = wave + mouseInfluence * 12;
+          const alpha = Math.min(0.12, 0.04 + mouseInfluence * 0.15 + (r / rows) * 0.06);
+
+          ctx.strokeStyle = `rgba(99, 102, 241, ${alpha})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(x1, y1 + offset);
+          ctx.lineTo(x2, y2 + offset);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(x1, y1 + offset);
+          ctx.lineTo(x3, y3 + offset);
+          ctx.stroke();
+        }
+      }
+
+      animId = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("mousemove", onMouse);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 0,
+        pointerEvents: "none",
+        opacity: 0.6,
+      }}
+    />
   );
 }
 
