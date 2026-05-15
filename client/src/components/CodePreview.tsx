@@ -45,7 +45,7 @@ export const CodePreview: React.FC<CodePreviewProps> = ({
         width: "100%",
         height: "100%",
         overflow: "hidden",
-        background: "rgba(0,0,0,0.02)",
+        background: "var(--bg-faint)",
       }}
     >
       {/* Header bar */}
@@ -56,13 +56,13 @@ export const CodePreview: React.FC<CodePreviewProps> = ({
           gap: 8,
           padding: "12px 16px",
           borderBottom: "1px solid rgba(0,0,0,0.04)",
-          background: "rgba(255,255,255,0.3)",
+          background: "var(--glass-bg)",
         }}
       >
         <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#FF5F56" }} />
         <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#FFBD2E" }} />
         <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#27C93F" }} />
-        <span style={{ marginLeft: 8, fontSize: 11, color: "rgba(0,0,0,0.15)", fontFamily: "ui-monospace, SFMono-Regular, monospace" }}>
+        <span style={{ marginLeft: 8, fontSize: 11, color: "var(--text-faint)", fontFamily: "ui-monospace, SFMono-Regular, monospace" }}>
           {language}
         </span>
       </div>
@@ -78,7 +78,7 @@ export const CodePreview: React.FC<CodePreviewProps> = ({
           lineHeight: 1.6,
         }}
       >
-        <pre style={{ margin: 0, whiteSpace: "pre-wrap", wordBreak: "break-word", color: "rgba(0,0,0,0.7)" }}>
+        <pre style={{ margin: 0, whiteSpace: "pre-wrap", wordBreak: "break-word", color: "var(--text-primary)" }}>
           {displayedCode}
           {isStreaming && cursorVisible && (
             <span style={{ color: "#6366f1", animation: "blink 1s step-end infinite" }}>|</span>

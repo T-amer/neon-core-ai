@@ -21,8 +21,8 @@ export type AIChatBoxProps = {
 const glassStyles = `
 .chat-scroll::-webkit-scrollbar { width: 6px; }
 .chat-scroll::-webkit-scrollbar-track { background: transparent; }
-.chat-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 3px; }
-.chat-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.15); }
+.chat-scroll::-webkit-scrollbar-thumb { background: var(--chat-scrollbar); border-radius: 3px; }
+.chat-scroll::-webkit-scrollbar-thumb:hover { background: var(--chat-scrollbar-hover); }
 `;
 
 export function AIChatBox({
@@ -92,7 +92,7 @@ export function AIChatBox({
             <div style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24 }}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
                 <Sparkles size={48} style={{ opacity: 0.15, color: "#6366f1" }} />
-                <p style={{ fontSize: 14, color: "rgba(0,0,0,0.25)" }}>{emptyStateMessage}</p>
+                <p style={{ fontSize: 14, color: "var(--text-quaternary)" }}>{emptyStateMessage}</p>
               </div>
               {suggestedPrompts && suggestedPrompts.length > 0 && (
                 <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 8, maxWidth: 500 }}>
@@ -107,13 +107,13 @@ export function AIChatBox({
                         fontSize: 13,
                         border: "1px solid rgba(0,0,0,0.06)",
                         background: "rgba(255,255,255,0.5)",
-                        color: "rgba(0,0,0,0.4)",
+                        color: "var(--text-secondary)",
                         cursor: isLoading ? "not-allowed" : "pointer",
                         opacity: isLoading ? 0.5 : 1,
                         transition: "all 0.2s",
                       }}
                       onMouseEnter={(e) => { if (!isLoading) { e.currentTarget.style.background = "rgba(99,102,241,0.06)"; e.currentTarget.style.borderColor = "rgba(99,102,241,0.15)"; } }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.5)"; e.currentTarget.style.borderColor = "rgba(0,0,0,0.06)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.5)"; e.currentTarget.style.borderColor = "var(--border-faint)"; }}
                     >
                       {prompt}
                     </button>
@@ -157,8 +157,8 @@ export function AIChatBox({
                       padding: "10px 16px",
                       background: message.role === "user"
                         ? "rgba(99,102,241,0.9)"
-                        : "rgba(255,255,255,0.6)",
-                      color: message.role === "user" ? "#fff" : "#1a1a1a",
+                        : "var(--chat-assistant-bg)",
+                      color: message.role === "user" ? "#fff" : "var(--text-primary)",
                       border: message.role === "assistant" ? "1px solid rgba(255,255,255,0.8)" : "none",
                     }}
                   >
@@ -176,7 +176,7 @@ export function AIChatBox({
                         width: 32,
                         height: 32,
                         borderRadius: "50%",
-                        background: "rgba(0,0,0,0.04)",
+                        background: "var(--border-faint)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -184,7 +184,7 @@ export function AIChatBox({
                         marginTop: 4,
                       }}
                     >
-                      <User size={16} style={{ color: "rgba(0,0,0,0.3)" }} />
+                      <User size={16} style={{ color: "var(--text-quaternary)" }} />
                     </div>
                   )}
                 </div>
@@ -210,11 +210,11 @@ export function AIChatBox({
                     style={{
                       borderRadius: 12,
                       padding: "10px 16px",
-                      background: "rgba(255,255,255,0.6)",
+                      background: "var(--chat-assistant-bg)",
                       border: "1px solid rgba(255,255,255,0.8)",
                     }}
                   >
-                    <Loader2 size={16} className="animate-spin" style={{ color: "rgba(0,0,0,0.2)" }} />
+                    <Loader2 size={16} className="animate-spin" style={{ color: "var(--text-muted)" }} />
                   </div>
                 </div>
               )}
@@ -232,7 +232,7 @@ export function AIChatBox({
             gap: 8,
             padding: 16,
             borderTop: "1px solid rgba(0,0,0,0.04)",
-            background: "rgba(255,255,255,0.3)",
+            background: "var(--chat-input-area)",
             alignItems: "flex-end",
           }}
         >
@@ -255,12 +255,12 @@ export function AIChatBox({
               borderRadius: 12,
               padding: "10px 16px",
               fontSize: 14,
-              color: "#1a1a1a",
+              color: "var(--text-primary)",
               outline: "none",
               fontFamily: "inherit",
             }}
-            onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(99,102,241,0.3)"; e.currentTarget.style.background = "rgba(255,255,255,0.8)"; }}
-            onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(0,0,0,0.06)"; e.currentTarget.style.background = "rgba(255,255,255,0.5)"; }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(99,102,241,0.3)"; e.currentTarget.style.background = "var(--chat-assistant-border)"; }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = "var(--border-faint)"; e.currentTarget.style.background = "rgba(255,255,255,0.5)"; }}
           />
           <button
             type="submit"
@@ -273,8 +273,8 @@ export function AIChatBox({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              background: input.trim() && !isLoading ? "#6366f1" : "rgba(0,0,0,0.04)",
-              color: input.trim() && !isLoading ? "#fff" : "rgba(0,0,0,0.15)",
+              background: input.trim() && !isLoading ? "#6366f1" : "var(--border-faint)",
+              color: input.trim() && !isLoading ? "#fff" : "var(--text-faint)",
               cursor: input.trim() && !isLoading ? "pointer" : "not-allowed",
               transition: "all 0.2s",
               flexShrink: 0,

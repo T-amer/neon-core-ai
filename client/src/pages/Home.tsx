@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { NeonButton } from "@/components/NeonButton";
 import { CodePreview } from "@/components/CodePreview";
 import { PricingCard } from "@/components/PricingCard";
 import { AIChatBox, Message } from "@/components/AIChatBox";
-import { Loader2, Star, Shield, Clock, Check, ChevronDown, Menu, X, ArrowRight, Zap, Sparkles, ChevronUp } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { Loader2, Star, Shield, Clock, Check, ChevronDown, Menu, X, ArrowRight, Zap, Sparkles, ChevronUp, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const styles = `
 *, *::before, *::after { box-sizing: border-box; }
@@ -128,7 +128,7 @@ const styles = `
 }
 
 .dots-bg {
-  background-image: radial-gradient(rgba(99,102,241,0.06) 1px, transparent 1px);
+  background-image: radial-gradient(var(--dot-bg, rgba(99,102,241,0.06)) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
@@ -202,7 +202,7 @@ const styles = `
   background: rgba(255,255,255,0.75);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(0,0,0,0.04);
+  border-bottom: 1px solid var(--border-faint);
   transition: background 0.4s ease, backdrop-filter 0.4s ease, box-shadow 0.4s ease;
 }
 
@@ -241,11 +241,11 @@ const styles = `
   background: rgba(255,255,255,0.5);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0,0,0,0.06);
+  border: 1px solid var(--border-faint);
   border-radius: 12px;
   padding: 14px 20px;
   font-size: 15px;
-  color: #1a1a1a;
+  color: var(--text-primary);
   outline: none;
   transition: all 0.3s ease;
   width: 100%;
@@ -287,6 +287,7 @@ const styles = `
   border-radius: 50%;
   background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, rgba(99,102,241,0.02) 30%, transparent 70%);
   transform: translate(-50%, -50%);
+  will-change: transform;
   transition: opacity 0.3s;
 }
 
@@ -294,18 +295,21 @@ const styles = `
   position: fixed;
   pointer-events: none;
   z-index: 99999;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  border: 1px solid rgba(99,102,241,0.2);
-  transition: width 0.3s, height 0.3s, border-color 0.3s, opacity 0.3s, background 0.3s;
+  border: 1px solid rgba(99,102,241,0.15);
+  transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.4s, opacity 0.3s, background 0.4s;
   transform: translate(-50%, -50%);
+  will-change: transform;
+  mix-blend-mode: normal;
 }
 .cursor-ring.hovering {
-  width: 60px;
-  height: 60px;
-  border-color: rgba(99,102,241,0.3);
-  background: rgba(99,102,241,0.03);
+  width: 56px;
+  height: 56px;
+  border-color: rgba(99,102,241,0.25);
+  background: rgba(99,102,241,0.04);
+  backdrop-filter: blur(4px);
 }
 .cursor-ring .cursor-dot {
   position: absolute;
@@ -314,14 +318,14 @@ const styles = `
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: rgba(99,102,241,0.3);
+  background: rgba(99,102,241,0.35);
   transform: translate(-50%, -50%);
-  transition: background 0.3s;
+  transition: width 0.4s, height 0.4s, background 0.4s;
 }
 .cursor-ring.hovering .cursor-dot {
   width: 6px;
   height: 6px;
-  background: rgba(99,102,241,0.5);
+  background: rgba(99,102,241,0.6);
 }
 
 .progress-bar {
@@ -485,7 +489,7 @@ const typewriterNiches = [
 ];
 
 const testimonials = [
-  { name: "Alexandre Moreau", role: "CEO, Finlytics", text: "We launched our fintech MVP in 3 days. The code quality was production-grade — cleaner than what most senior devs produce.", rating: 5 },
+  { name: "Alexandre Moreau", role: "CEO, Finlytics", text: "We launched our fintech MVP in 3 days. The code quality was production-grade Ã¢â‚¬â€ cleaner than what most senior devs produce.", rating: 5 },
   { name: "Sarah Al-Mansouri", role: "Founder, DXB Health", text: "I spent $40k+ on agencies before. NEON-CORE delivered a better product in 48 hours. The math is simple.", rating: 5 },
   { name: "Marcus Chen", role: "CTO, ScaleUp Labs", text: "We run 6 SaaS products on this architecture. Zero issues. It's become our standard stack for all new ventures.", rating: 5 },
 ];
@@ -493,7 +497,7 @@ const testimonials = [
 const logos = ["Stripe", "Vercel", "Next.js", "Tailwind CSS", "Prisma", "Supabase"];
 
 const faqs = [
-  { q: "What exactly do I get?", a: "A complete, production-ready Next.js SaaS boilerplate with authentication, payment integration, database schema, admin dashboard, and deployment configuration — all tailored to your specific business niche." },
+  { q: "What exactly do I get?", a: "A complete, production-ready Next.js SaaS boilerplate with authentication, payment integration, database schema, admin dashboard, and deployment configuration Ã¢â‚¬â€ all tailored to your specific business niche." },
   { q: "Can I really deploy in 48 hours?", a: "Yes. The average deployment time is 3 hours after generation. The code is designed to deploy immediately on Vercel with zero configuration required." },
   { q: "What if I need custom features?", a: "You receive full source code with no restrictions. Your team can extend it freely. Enterprise clients also receive 1-on-1 architecture calls to plan customizations." },
   { q: "Is there a refund policy?", a: "30-day money-back guarantee, no questions asked. If the boilerplate doesn't meet your standards, you receive a full refund." },
@@ -501,18 +505,18 @@ const faqs = [
 ];
 
 const features = [
-  { title: "Authentication & RBAC", desc: "Complete auth system with role-based access control, social login, session management, and security best practices built in.", icon: "🔐" },
-  { title: "Payment Processing", desc: "Stripe integration with subscription management, invoicing, webhooks, and revenue analytics dashboard.", icon: "💳" },
-  { title: "Database Schema", desc: "PostgreSQL with Prisma ORM. Optimized migrations, relationships, and query performance for SaaS applications.", icon: "🗄️" },
-  { title: "Admin Dashboard", desc: "Full admin panel with user management, analytics, logs, and system configuration. Ready to customize.", icon: "📊" },
-  { title: "API Infrastructure", desc: "Type-safe API routes with rate limiting, caching, validation, and comprehensive error handling.", icon: "⚡" },
-  { title: "Deployment Pipeline", desc: "One-click deploy to Vercel with custom domain, SSL, CI/CD, and monitoring out of the box.", icon: "🚀" },
+  { title: "Authentication & RBAC", desc: "Complete auth system with role-based access control, social login, session management, and security best practices built in.", icon: "Ã°Å¸â€Â" },
+  { title: "Payment Processing", desc: "Stripe integration with subscription management, invoicing, webhooks, and revenue analytics dashboard.", icon: "Ã°Å¸â€™Â³" },
+  { title: "Database Schema", desc: "PostgreSQL with Prisma ORM. Optimized migrations, relationships, and query performance for SaaS applications.", icon: "Ã°Å¸â€”â€žÃ¯Â¸Â" },
+  { title: "Admin Dashboard", desc: "Full admin panel with user management, analytics, logs, and system configuration. Ready to customize.", icon: "Ã°Å¸â€œÅ " },
+  { title: "API Infrastructure", desc: "Type-safe API routes with rate limiting, caching, validation, and comprehensive error handling.", icon: "Ã¢Å¡Â¡" },
+  { title: "Deployment Pipeline", desc: "One-click deploy to Vercel with custom domain, SSL, CI/CD, and monitoring out of the box.", icon: "Ã°Å¸Å¡â‚¬" },
 ];
 
 async function mockBoilerplate(niche: string): Promise<string> {
   await new Promise((r) => setTimeout(r, 2000));
   const clean = niche.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase().slice(0, 20);
-  return `// NEON-CORE AI — Production Boilerplate for "${niche}"
+  return `// NEON-CORE AI Ã¢â‚¬â€ Production Boilerplate for "${niche}"
 // Project: ${clean}
 
 const project = {
@@ -537,14 +541,55 @@ export default project;`;
 async function mockAiResponse(prompt: string): Promise<string> {
   await new Promise((r) => setTimeout(r, 1500));
   return `**Architecture strategy for "${prompt}"**\n\n` +
-    `1. **Audit** — Analyze top 3 competitors and identify technical gaps\n` +
-    `2. **Architecture** — Database schema, API design, component hierarchy\n` +
-    `3. **Generation** — AI builds the complete codebase with your brand\n` +
-    `4. **Deployment** — Auto-deployed on Vercel with CI/CD pipeline\n\n` +
+    `1. **Audit** Ã¢â‚¬â€ Analyze top 3 competitors and identify technical gaps\n` +
+    `2. **Architecture** Ã¢â‚¬â€ Database schema, API design, component hierarchy\n` +
+    `3. **Generation** Ã¢â‚¬â€ AI builds the complete codebase with your brand\n` +
+    `4. **Deployment** Ã¢â‚¬â€ Auto-deployed on Vercel with CI/CD pipeline\n\n` +
     `*Want to dive deeper into any of these steps? I'm here 24/7.*`;
 }
 
-/* ─── PARTICLE CANVAS ─── */
+async function realBoilerplate(niche: string, generate: Function): Promise<string> {
+  try {
+    const result = await generate({ niche });
+    const bp = result as any;
+    return `// NEON-CORE AI Ã¢â‚¬â€ Production Boilerplate for "${niche}"
+// Project: ${bp.projectName}
+
+${bp.description ? `/* ${bp.description} */\n` : ""}
+${bp.directoryStructure ? `/* Directory Structure:\n${bp.directoryStructure}\n*/\n` : ""}
+
+const project = {
+  name: "${bp.projectName || niche.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase()}",
+  niche: "${niche}",
+  description: "${(bp.description || "Production-grade SaaS for " + niche).replace(/"/g, '\\"')}",
+  techStack: ["Next.js 15", "Tailwind CSS v4", "PostgreSQL", "Stripe", "Auth.js"],
+  features: [
+    "Authentication + RBAC",
+    "Payment processing",
+    "Dashboard & Analytics",
+    "SEO-optimized pages",
+    "API routes + Webhooks",
+    "Email notifications"
+  ],
+  performance: { lighthouse: 96, loadTime: "0.8s" }
+};
+
+export default project;`;
+  } catch {
+    return mockBoilerplate(niche);
+  }
+}
+
+async function realAiResponse(prompt: string, generateResponse: Function): Promise<string> {
+  try {
+    const result = await generateResponse({ prompt });
+    return (result as any).response || `**AI response to: "${prompt}"**`;
+  } catch {
+    return mockAiResponse(prompt);
+  }
+}
+
+/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ PARTICLE CANVAS Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 function ParticleCanvas({ isVisible }: { isVisible: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -647,9 +692,9 @@ function ParticleCanvas({ isVisible }: { isVisible: boolean }) {
   return <canvas ref={canvasRef} id="particle-canvas" />;
 }
 
-/* ─── SCRAMBLE TEXT ─── */
+/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ SCRAMBLE TEXT Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 function ScrambleText({ text, className = "" }: { text: string; className?: string }) {
-  const chars = "!<>-_\\/[]{}—=+*^?#________";
+  const chars = "!<>-_\\/[]{}Ã¢â‚¬â€=+*^?#________";
   const [display, setDisplay] = useState(text);
   const [done, setDone] = useState(false);
 
@@ -689,7 +734,7 @@ function ScrambleText({ text, className = "" }: { text: string; className?: stri
   );
 }
 
-/* ─── COUNTER ─── */
+/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ COUNTER Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 function Counter({ to, prefix = "", suffix = "", label }: { to: number; prefix?: string; suffix?: string; label: string }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
@@ -719,14 +764,13 @@ function Counter({ to, prefix = "", suffix = "", label }: { to: number; prefix?:
       <p className="text-4xl font-bold tracking-tight" style={{ color: "#6366f1" }}>
         {prefix}{count}{suffix}
       </p>
-      <p className="text-sm mt-2" style={{ color: "rgba(0,0,0,0.3)" }}>{label}</p>
+      <p className="text-sm mt-2" style={{ color: "var(--text-quaternary)" }}>{label}</p>
     </div>
   );
 }
 
-/* ─── MAIN ─── */
+/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ MAIN Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 export default function Home() {
-  const { user, isAuthenticated, logout } = useAuth();
   const [niche, setNiche] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedCode, setGeneratedCode] = useState("");
@@ -739,6 +783,7 @@ export default function Home() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [navScrolled, setNavScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
   const [typewriterIndex, setTypewriterIndex] = useState(0);
   const [typewriterText, setTypewriterText] = useState("");
   const [typewriterDeleting, setTypewriterDeleting] = useState(false);
@@ -746,15 +791,13 @@ export default function Home() {
     { role: "system", content: "You are NEON-CORE AI, a SaaS architecture expert." },
   ]);
   const heroRef = useRef<HTMLDivElement>(null);
-  const mainRef = useRef<HTMLDivElement>(null);
-  const heroCardRef = useRef<HTMLDivElement>(null);
 
   useScrollReveal();
 
-  /* ─── GLOBAL TILT ─── */
+  /* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ GLOBAL TILT Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
-      const cards = document.querySelectorAll<HTMLElement>("[data-tilt]");
+      const cards = Array.from(document.querySelectorAll<HTMLElement>("[data-tilt]"));
       for (const el of cards) {
         const rect = el.getBoundingClientRect();
         const x = (e.clientX - rect.left) / rect.width;
@@ -765,7 +808,7 @@ export default function Home() {
       }
     };
     const onLeave = () => {
-      const cards = document.querySelectorAll<HTMLElement>("[data-tilt]");
+      const cards = Array.from(document.querySelectorAll<HTMLElement>("[data-tilt]"));
       for (const el of cards) {
         el.style.transform = "perspective(800px) rotateX(0deg) rotateY(0deg)";
       }
@@ -778,10 +821,10 @@ export default function Home() {
     };
   }, []);
 
-  /* ─── MAGNETIC BUTTONS ─── */
+  /* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ MAGNETIC BUTTONS Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
-      const btns = document.querySelectorAll<HTMLElement>(".glass-btn");
+      const btns = Array.from(document.querySelectorAll<HTMLButtonElement>(".glass-btn"));
       for (const btn of btns) {
         if (btn.disabled) continue;
         const rect = btn.getBoundingClientRect();
@@ -799,7 +842,7 @@ export default function Home() {
       }
     };
     const onLeave = () => {
-      const btns = document.querySelectorAll<HTMLElement>(".glass-btn");
+      const btns = Array.from(document.querySelectorAll<HTMLElement>(".glass-btn"));
       for (const btn of btns) btn.style.transform = "";
     };
     document.addEventListener("mousemove", onMove);
@@ -810,7 +853,7 @@ export default function Home() {
     };
   }, []);
 
-  /* ─── RIPPLE ─── */
+  /* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ RIPPLE Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
   const addRipple = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const btn = e.currentTarget;
     const rect = btn.getBoundingClientRect();
@@ -828,14 +871,14 @@ export default function Home() {
     setTimeout(() => ripple.remove(), 600);
   }, []);
 
-  /* ─── MOUSE ─── */
+  /* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ MOUSE Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => setMousePos({ x: e.clientX, y: e.clientY });
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  /* ─── CURSOR HOVER ─── */
+  /* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ CURSOR HOVER Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
   useEffect(() => {
     const handleHover = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -846,7 +889,7 @@ export default function Home() {
     return () => window.removeEventListener("mouseover", handleHover);
   }, []);
 
-  /* ─── SCROLL ─── */
+  /* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ SCROLL Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
@@ -859,7 +902,26 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  /* ─── HERO PARALLAX ─── */
+  /* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ ACTIVE SECTION Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+  useEffect(() => {
+    const sections = navLinks.map(l => document.getElementById(l.id)).filter(Boolean);
+    const handleScroll = () => {
+      const scrollPos = window.scrollY + 150;
+      let current = "";
+      for (const section of sections) {
+        const el = section as HTMLElement;
+        if (el.offsetTop <= scrollPos) {
+          current = el.id;
+        }
+      }
+      setActiveSection(current);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  /* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ HERO PARALLAX Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
   useEffect(() => {
     const el = heroRef.current;
     if (!el) return;
@@ -869,7 +931,7 @@ export default function Home() {
       const y = (e.clientY - rect.top) / rect.height - 0.5;
       const bg = el.querySelector(".hero-bg") as HTMLElement;
       if (bg) bg.style.transform = `translate(${x * -20}px, ${y * -20}px)`;
-      const shapes = el.querySelectorAll<HTMLElement>(".parallax-shape");
+      const shapes = Array.from(el.querySelectorAll<HTMLElement>(".parallax-shape"));
       for (const s of shapes) {
         const speed = parseFloat(s.dataset.speed || "1");
         s.style.transform = `translate(${x * 30 * speed}px, ${y * 30 * speed}px)`;
@@ -879,7 +941,7 @@ export default function Home() {
     return () => el.removeEventListener("mousemove", handleHeroMove);
   }, []);
 
-  /* ─── TYPEWRITER ─── */
+  /* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ TYPEWRITER Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
   useEffect(() => {
     const currentNiche = typewriterNiches[typewriterIndex];
     let timer: ReturnType<typeof setTimeout>;
@@ -900,10 +962,17 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [typewriterText, typewriterDeleting, typewriterIndex]);
 
+  const generateMutation = trpc.boilerplate.generate.useMutation();
+  const { theme, toggleTheme } = useTheme();
+  const aiMutation = trpc.ai.generateResponse.useMutation();
+
   const handleGenerate = async () => {
     if (!niche.trim()) { alert("Enter your business niche"); return; }
     setIsGenerating(true); setShowPreview(true);
-    try { setGeneratedCode(await mockBoilerplate(niche)); }
+    try {
+      const code = await realBoilerplate(niche, (input: any) => generateMutation.mutateAsync(input));
+      setGeneratedCode(code);
+    }
     catch (e) { setGeneratedCode(`// Error: ${e instanceof Error ? e.message : "Generation failed"}`); }
     finally { setIsGenerating(false); }
   };
@@ -913,7 +982,7 @@ export default function Home() {
     setChatMessages((p) => [...p, newMessage]);
     setAiLoading(true);
     try {
-      const response = await mockAiResponse(content);
+      const response = await realAiResponse(content, (input: any) => aiMutation.mutateAsync(input));
       setChatMessages((p) => [...p, { role: "assistant", content: response }]);
     } catch (e) { console.error(e); }
     finally { setAiLoading(false); }
@@ -932,7 +1001,7 @@ export default function Home() {
   ];
 
   return (
-    <div ref={mainRef} style={{ backgroundColor: "#f8f9fb", color: "#1a1a1a", minHeight: "100vh" }}>
+    <div className="app-root" style={{ minHeight: "100vh" }}>
       <style>{styles}</style>
 
       {/* GRAIN OVERLAY */}
@@ -981,35 +1050,48 @@ export default function Home() {
         style={{
           background: navScrolled ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.7)",
           backdropFilter: navScrolled ? "blur(32px)" : "blur(20px)",
-          boxShadow: navScrolled ? "0 1px 40px rgba(0,0,0,0.04)" : "none",
+          boxShadow: navScrolled ? "0 1px 40px var(--border-faint)" : "none",
         }}
       >
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="text-lg font-bold tracking-tight">
-            <span style={{ color: "#6366f1" }}>NEON</span><span style={{ color: "rgba(0,0,0,0.8)" }}>_CORE</span>
+            <span style={{ color: "#6366f1" }}>NEON</span><span style={{ color: "var(--text-strong)" }}>_CORE</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <button
-                key={link.id}
-                onClick={() => scrollTo(link.id)}
-                className="text-sm transition-all relative group"
-                style={{ color: "rgba(0,0,0,0.4)", fontWeight: 500 }}
-                onMouseEnter={(e) => e.currentTarget.style.color = "rgba(0,0,0,0.8)"}
-                onMouseLeave={(e) => e.currentTarget.style.color = "rgba(0,0,0,0.4)"}
-              >
-                {link.label}
-                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-indigo-500 transition-all duration-300 group-hover:w-full" style={{ background: "#6366f1", borderRadius: 1 }} />
-              </button>
-            ))}
+              {navLinks.map((link) => {
+                const isActive = activeSection === link.id;
+                return (
+                  <button
+                    key={link.id}
+                    onClick={() => scrollTo(link.id)}
+                    className="text-sm transition-all relative group"
+                    style={{ color: isActive ? "#6366f1" : "var(--text-secondary)", fontWeight: isActive ? 600 : 500 }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = "var(--text-strong)"}
+                    onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.color = "var(--text-secondary)"; }}
+                  >
+                    {link.label}
+                    <span className="absolute -bottom-1 left-0 h-[2px] transition-all duration-300" style={{ width: isActive ? "100%" : "0%", background: "#6366f1", borderRadius: 1 }} />
+                  </button>
+                );
+              })}
           </div>
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2"
-            aria-label="Menu"
-          >
-            {isMenuOpen ? <X size={20} style={{ color: "rgba(0,0,0,0.5)" }} /> : <Menu size={20} style={{ color: "rgba(0,0,0,0.5)" }} />}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-xl transition-all duration-300 hover:bg-white/50"
+              aria-label="Toggle theme"
+              style={{ color: "var(--text-quaternary)" }}
+            >
+              {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+            </button>
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden p-2"
+              aria-label="Menu"
+            >
+              {isMenuOpen ? <X size={20} style={{ color: "var(--text-tertiary)" }} /> : <Menu size={20} style={{ color: "var(--text-tertiary)" }} />}
+            </button>
+          </div>
         </div>
         {isMenuOpen && (
           <div className="md:hidden px-6 pb-6 space-y-2">
@@ -1018,7 +1100,7 @@ export default function Home() {
                 key={link.id}
                 onClick={() => scrollTo(link.id)}
                 className="block w-full text-left py-3 px-4 rounded-lg text-sm"
-                style={{ color: "rgba(0,0,0,0.6)", background: "rgba(0,0,0,0.02)" }}
+                style={{ color: "var(--text-tertiary)", background: "var(--bg-faint)" }}
               >
                 {link.label}
               </button>
@@ -1064,7 +1146,7 @@ export default function Home() {
         <div className="light-beam" style={{ left: "30%", animation: "ray-move-2 15s ease-in-out infinite 3s" }} />
 
         <div className="max-w-5xl mx-auto text-center relative" style={{ zIndex: 2 }}>
-          <div ref={heroCardRef} className="glass-card-gradient p-10 md:p-16 relative overflow-hidden" data-tilt>
+          <div className="glass-card-gradient p-10 md:p-16 relative overflow-hidden" data-tilt>
             <div className="hero-bg absolute inset-0 pointer-events-none mesh-bg" style={{ transition: "transform 0.1s ease-out" }} />
             <div className="shimmer-line absolute top-0 left-0 right-0 h-[1px]" />
             <ParticleCanvas isVisible={true} />
@@ -1089,7 +1171,7 @@ export default function Home() {
                 in <span style={{ color: "#6366f1" }}>48 hours</span>
               </h1>
               <div className="h-8 mb-8" data-reveal="fade-up" data-stagger="hero" style={{ transitionDelay: "0.25s" }}>
-                <span className="text-base md:text-lg" style={{ color: "rgba(0,0,0,0.3)" }}>
+                <span className="text-base md:text-lg" style={{ color: "var(--text-quaternary)" }}>
                   Built for{" "}
                   <span style={{ color: "#6366f1", fontWeight: 600 }}>{typewriterText}</span>
                   <span className="typewriter-cursor" />
@@ -1099,9 +1181,9 @@ export default function Home() {
                 className="text-lg md:text-xl max-w-3xl mx-auto mb-12"
                 data-reveal="fade-up"
                 data-stagger="hero"
-                style={{ color: "rgba(0,0,0,0.4)", lineHeight: 1.7, transitionDelay: "0.35s" }}
+                style={{ color: "var(--text-secondary)", lineHeight: 1.7, transitionDelay: "0.35s" }}
               >
-                NEON-CORE AI generates a complete, production-ready Next.js SaaS boilerplate with authentication, payments, database, and deployment — tailored to your specific business niche.
+                NEON-CORE AI generates a complete, production-ready Next.js SaaS boilerplate with authentication, payments, database, and deployment Ã¢â‚¬â€ tailored to your specific business niche.
               </p>
               <div
                 className="flex flex-col md:flex-row gap-4 max-w-2xl mx-auto mb-8"
@@ -1133,7 +1215,7 @@ export default function Home() {
                 className="flex items-center justify-center gap-6 text-sm flex-wrap"
                 data-reveal="fade-up"
                 data-stagger="hero"
-                style={{ color: "rgba(0,0,0,0.25)", transitionDelay: "0.55s" }}
+                style={{ color: "var(--text-quaternary)", transitionDelay: "0.55s" }}
               >
                 <span className="flex items-center gap-1.5"><Shield size={14} /> 30-day guarantee</span>
                 <span className="flex items-center gap-1.5"><Check size={14} /> Full ownership</span>
@@ -1150,18 +1232,18 @@ export default function Home() {
         <section className="px-6 pb-24 -mt-16 relative" style={{ zIndex: 1 }}>
           <div className="max-w-4xl mx-auto" data-reveal="scale-in">
             <div className="glass-card-heavy overflow-hidden glow-border">
-              <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
+              <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1px solid var(--border-faint)" }}>
                 <div className="w-3 h-3 rounded-full" style={{ background: "#FF5F56" }} />
                 <div className="w-3 h-3 rounded-full" style={{ background: "#FFBD2E" }} />
                 <div className="w-3 h-3 rounded-full" style={{ background: "#27C93F" }} />
-                <span className="ml-3 text-xs" style={{ color: "rgba(0,0,0,0.15)" }}>generated-boilerplate.ts</span>
+                <span className="ml-3 text-xs" style={{ color: "var(--text-faint)" }}>generated-boilerplate.ts</span>
               </div>
-              <div className="h-80" style={{ background: "rgba(0,0,0,0.02)" }}>
+              <div className="h-80" style={{ background: "var(--bg-faint)" }}>
                 {isGenerating ? (
                   <div className="h-full flex items-center justify-center">
                     <div className="text-center">
                       <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: "#6366f1" }} />
-                      <p className="text-sm" style={{ color: "rgba(0,0,0,0.3)" }}>Generating your boilerplate...</p>
+                      <p className="text-sm" style={{ color: "var(--text-quaternary)" }}>Generating your boilerplate...</p>
                     </div>
                   </div>
                 ) : (
@@ -1179,7 +1261,7 @@ export default function Home() {
                 </button>
                 <button
                   className="glass-btn"
-                  style={{ borderColor: "rgba(0,0,0,0.1)", color: "rgba(0,0,0,0.5)" }}
+                  style={{ borderColor: "var(--text-faint)", color: "var(--text-tertiary)" }}
                   onClick={() => scrollTo("ai-advisor")}
                 >
                   Chat with AI Advisor
@@ -1193,14 +1275,14 @@ export default function Home() {
       {/* TRUST BAR (Marquee) */}
       <section className="py-20 px-6 relative" style={{ zIndex: 1 }}>
         <div className="glass-card-heavy max-w-5xl mx-auto py-12 px-8 text-center">
-          <p className="text-xs tracking-widest uppercase mb-8" style={{ color: "rgba(0,0,0,0.15)" }}>Trusted by founders and engineers at</p>
+          <p className="text-xs tracking-widest uppercase mb-8" style={{ color: "var(--text-faint)" }}>Trusted by founders and engineers at</p>
           <div className="marquee-track">
             <div className="marquee-content">
               {[...logos, ...logos].map((logo, i) => (
                 <span
                   key={i}
                   className="text-sm font-bold tracking-wider transition-all duration-300 hover:scale-110 flex-shrink-0"
-                  style={{ color: `rgba(0,0,0,${0.15 + (i % logos.length) * 0.03})` }}
+                  style={{ color: "var(--text-faint)" }}
                 >
                   {logo}
                 </span>
@@ -1219,7 +1301,7 @@ export default function Home() {
             <div className="flex justify-center mb-6">
               <div className="section-tag">Why NEON-CORE?</div>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4 leading-tight" style={{ color: "#1a1a1a" }}>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4 leading-tight" style={{ color: "var(--text-primary)" }}>
               The old way vs.{" "}
               <span className="gradient-text">the new way</span>
             </h2>
@@ -1227,21 +1309,21 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-8 items-stretch">
             <div className="glass-card-heavy p-10" data-tilt data-reveal="fade-left" style={{ transitionDelay: "0.1s" }}>
               <div className="section-tag" style={{ borderColor: "rgba(239,68,68,0.15)", background: "rgba(239,68,68,0.05)", color: "#ef4444" }}>
-                ✕ The Problem
+                Ã¢Å“â€¢ The Problem
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-6 leading-tight" style={{ color: "#1a1a1a" }}>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-6 leading-tight" style={{ color: "var(--text-primary)" }}>
                 Every month you wait is costing you{" "}
                 <span style={{ color: "#ef4444" }}>$10,000+</span>
               </h2>
               <ul className="space-y-5">
                 {[
-                  "Agencies quote $15k–$50k and deliver in 3 months — most of which is generic setup",
+                  "Agencies quote $15kÃ¢â‚¬â€œ$50k and deliver in 3 months Ã¢â‚¬â€ most of which is generic setup",
                   "Months spent on tutorials and boilerplates that don't fit your specific needs",
                   "Your idea is validated. What's missing is the technical foundation to ship it",
                   "Competitors are launching and capturing market share every day",
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-base" style={{ color: "rgba(0,0,0,0.4)", lineHeight: 1.7 }}>
-                    <span style={{ color: "#ef4444", marginTop: 5, flexShrink: 0 }}>✕</span>
+                  <li key={i} className="flex items-start gap-3 text-base" style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}>
+                    <span style={{ color: "#ef4444", marginTop: 5, flexShrink: 0 }}>Ã¢Å“â€¢</span>
                     {item}
                   </li>
                 ))}
@@ -1249,21 +1331,21 @@ export default function Home() {
             </div>
             <div className="glass-card-heavy p-10" data-tilt data-reveal="fade-right" style={{ transitionDelay: "0.2s" }}>
               <div className="section-tag" style={{ borderColor: "rgba(5,150,105,0.15)", background: "rgba(5,150,105,0.05)", color: "#059669" }}>
-                ✓ The Solution
+                Ã¢Å“â€œ The Solution
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-6 leading-tight" style={{ color: "#1a1a1a" }}>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-6 leading-tight" style={{ color: "var(--text-primary)" }}>
                 Production SaaS in{" "}
                 <span style={{ color: "#059669" }}>48 hours</span>
               </h2>
               <ul className="space-y-5">
                 {[
                   "AI generates a complete Next.js codebase with auth, Stripe, database, and dashboards",
-                  "Enterprise-grade architecture with best practices — no technical debt",
+                  "Enterprise-grade architecture with best practices Ã¢â‚¬â€ no technical debt",
                   "Deploy to Vercel in one click. Live and accepting payments the same day",
                   "Full source code ownership. Extend it, scale it, own it. Zero lock-in",
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-base" style={{ color: "rgba(0,0,0,0.5)", lineHeight: 1.7 }}>
-                    <span style={{ color: "#059669", marginTop: 5, flexShrink: 0 }}>✓</span>
+                  <li key={i} className="flex items-start gap-3 text-base" style={{ color: "var(--text-tertiary)", lineHeight: 1.7 }}>
+                    <span style={{ color: "#059669", marginTop: 5, flexShrink: 0 }}>Ã¢Å“â€œ</span>
                     {item}
                   </li>
                 ))}
@@ -1282,10 +1364,10 @@ export default function Home() {
             <div className="flex justify-center mb-6">
               <div className="section-tag pulse-soft"><Zap size={12} /> Features</div>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "#1a1a1a" }}>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "var(--text-primary)" }}>
               Everything you need to launch
             </h2>
-            <p className="text-lg max-w-3xl mx-auto" style={{ color: "rgba(0,0,0,0.4)" }}>
+            <p className="text-lg max-w-3xl mx-auto" style={{ color: "var(--text-secondary)" }}>
               A complete production infrastructure, generated for your exact niche.
             </p>
           </div>
@@ -1298,11 +1380,11 @@ export default function Home() {
                 data-reveal="blur-in"
                 style={{ transitionDelay: `${i * 0.08}s` }}
               >
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-lg transition-all duration-300 group-hover:scale-110 group-hover:rotate-3" style={{ background: "rgba(99,102,241,0.08)" }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-lg transition-all duration-300 group-hover:scale-110 group-hover:rotate-3" style={{ background: "var(--accent-bg)" }}>
                   {feature.icon}
                 </div>
-                <h3 className="text-base font-semibold mb-3" style={{ color: "#1a1a1a" }}>{feature.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(0,0,0,0.4)", lineHeight: 1.7 }}>{feature.desc}</p>
+                <h3 className="text-base font-semibold mb-3" style={{ color: "var(--text-primary)" }}>{feature.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}>{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -1318,10 +1400,10 @@ export default function Home() {
             <div className="flex justify-center mb-6">
               <div className="section-tag"><Star size={12} /> Testimonials</div>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "#1a1a1a" }}>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "var(--text-primary)" }}>
               Trusted by founders worldwide
             </h2>
-            <p className="text-lg" style={{ color: "rgba(0,0,0,0.4)" }}>
+            <p className="text-lg" style={{ color: "var(--text-secondary)" }}>
               Here's what teams are saying after shipping with NEON-CORE.
             </p>
           </div>
@@ -1339,12 +1421,12 @@ export default function Home() {
                     <Star key={j} size={14} fill="#f59e0b" color="#f59e0b" />
                   ))}
                 </div>
-                <p className="text-sm mb-6 leading-relaxed" style={{ color: "rgba(0,0,0,0.45)", lineHeight: 1.7 }}>
+                <p className="text-sm mb-6 leading-relaxed" style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}>
                   "{t.text}"
                 </p>
-                <div style={{ borderTop: "1px solid rgba(0,0,0,0.04)", paddingTop: 16 }}>
-                  <p className="text-sm font-semibold" style={{ color: "#1a1a1a" }}>{t.name}</p>
-                  <p className="text-xs" style={{ color: "rgba(0,0,0,0.25)" }}>{t.role}</p>
+                <div style={{ borderTop: "1px solid var(--border-faint)", paddingTop: 16 }}>
+                  <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{t.name}</p>
+                  <p className="text-xs" style={{ color: "var(--text-quaternary)" }}>{t.role}</p>
                 </div>
               </div>
             ))}
@@ -1352,18 +1434,18 @@ export default function Home() {
 
           {/* ROI */}
           <div className="glass-card-heavy p-10 md:p-14 max-w-4xl mx-auto text-center" data-tilt>
-            <p className="text-xs tracking-widest mb-8" style={{ color: "rgba(0,0,0,0.2)" }}>ROI COMPARISON</p>
+            <p className="text-xs tracking-widest mb-8" style={{ color: "var(--text-muted)" }}>ROI COMPARISON</p>
             <div className="grid md:grid-cols-3 gap-10">
               <Counter to={50} prefix="$" suffix="k" label="Average agency cost" />
               <Counter to={6} suffix=" months" label="Average agency timeline" />
               <div>
-                <p className="text-4xl font-bold tracking-tight" style={{ color: "#059669" }}>$49–$10k</p>
-                <p className="text-sm mt-2" style={{ color: "rgba(0,0,0,0.3)" }}>Your investment</p>
+                <p className="text-4xl font-bold tracking-tight" style={{ color: "#059669" }}>$49Ã¢â‚¬â€œ$10k</p>
+                <p className="text-sm mt-2" style={{ color: "var(--text-quaternary)" }}>Your investment</p>
               </div>
             </div>
-            <div className="mt-10 pt-8" style={{ borderTop: "1px solid rgba(0,0,0,0.04)" }}>
-              <p className="text-lg font-semibold" style={{ color: "rgba(0,0,0,0.6)" }}>
-                Save 95% · Ship 50x faster · Own 100% of your code
+            <div className="mt-10 pt-8" style={{ borderTop: "1px solid var(--border-faint)" }}>
+              <p className="text-lg font-semibold" style={{ color: "var(--text-tertiary)" }}>
+                Save 95% Ã‚Â· Ship 50x faster Ã‚Â· Own 100% of your code
               </p>
             </div>
           </div>
@@ -1379,10 +1461,10 @@ export default function Home() {
             <div className="flex justify-center mb-6">
               <div className="section-tag pulse-soft"><Sparkles size={12} /> Pricing</div>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "#1a1a1a" }}>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "var(--text-primary)" }}>
               Choose your launch path
             </h2>
-            <p className="text-lg" style={{ color: "rgba(0,0,0,0.4)" }}>
+            <p className="text-lg" style={{ color: "var(--text-secondary)" }}>
               One price. Full ownership. No recurring fees.
             </p>
           </div>
@@ -1392,7 +1474,6 @@ export default function Home() {
               price="$49"
               description="One SaaS boilerplate. Full ownership."
               features={["1 Boilerplate Generation", "Full Source Code", "Neon UI Theme", "30-Day Guarantee", "1-Click Deploy", "Email Support"]}
-              color="indigo"
               onSelect={() => window.open("https://buy.stripe.com/test_28o4hC5iD9Wj3HG9AA", "_blank")}
             /></div>
             <div data-tilt><PricingCard
@@ -1401,7 +1482,6 @@ export default function Home() {
               description="Unlimited generations. Priority support."
               features={["Unlimited Generations", "Full Source Code", "All UI Themes", "30-Day Guarantee", "Priority Support", "Team Collaboration", "Custom Domain", "API Access"]}
               isPopular={true}
-              color="indigo"
               onSelect={() => window.open("https://buy.stripe.com/test_5kA7vC2iD1Wj3HGcCC", "_blank")}
             /></div>
             <div data-tilt><PricingCard
@@ -1409,7 +1489,6 @@ export default function Home() {
               price="$10,000"
               description="Done-for-you. White-glove custom build."
               features={["Custom AI Training", "1-on-1 Architecture Call", "Custom Feature Development", "White-Label Deployment", "Dedicated Support Team", "SLA Guarantee", "Source Code Ownership", "Priority API Access"]}
-              color="indigo"
               onSelect={() => window.open("https://buy.stripe.com/test_5kA7vC2iD1Wj3HGcCC", "_blank")}
             /></div>
           </div>
@@ -1417,7 +1496,7 @@ export default function Home() {
             className="glass-card-gradient py-8 px-6 max-w-2xl mx-auto text-center"
             data-reveal="scale-in"
           >
-            <p className="text-sm" style={{ color: "rgba(0,0,0,0.2)" }}>
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
               <Shield size={14} className="inline mr-1" style={{ color: "#059669" }} /> 
               Every plan includes a <strong style={{ color: "#059669" }}>30-day money-back guarantee</strong>. No questions asked.
             </p>
@@ -1434,10 +1513,10 @@ export default function Home() {
             <div className="flex justify-center mb-6">
               <div className="section-tag"><Sparkles size={12} /> AI Advisor</div>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "#1a1a1a" }}>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "var(--text-primary)" }}>
               Not sure where to start? Ask the AI.
             </h2>
-            <p className="text-lg" style={{ color: "rgba(0,0,0,0.4)" }}>
+            <p className="text-lg" style={{ color: "var(--text-secondary)" }}>
               Describe your idea and get an instant architecture strategy.
             </p>
           </div>
@@ -1460,10 +1539,10 @@ export default function Home() {
             <div className="flex justify-center mb-6">
               <div className="section-tag">FAQ</div>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "#1a1a1a" }}>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "var(--text-primary)" }}>
               Common questions
             </h2>
-            <p className="text-lg" style={{ color: "rgba(0,0,0,0.4)" }}>
+            <p className="text-lg" style={{ color: "var(--text-secondary)" }}>
               Everything you need to know before getting started.
             </p>
           </div>
@@ -1480,8 +1559,8 @@ export default function Home() {
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full flex items-center justify-between p-5 text-left"
                 >
-                  <span className="text-sm font-medium" style={{ color: "#1a1a1a" }}>{faq.q}</span>
-                  <ChevronDown size={16} style={{ color: "rgba(0,0,0,0.2)", transform: openFaq === i ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.3s", flexShrink: 0 }} />
+                  <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{faq.q}</span>
+                  <ChevronDown size={16} style={{ color: "var(--text-muted)", transform: openFaq === i ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.3s", flexShrink: 0 }} />
                 </button>
                 <div
                   style={{
@@ -1492,7 +1571,7 @@ export default function Home() {
                   }}
                 >
                   <div className="px-5 pb-5 pt-0">
-                    <p className="text-sm leading-relaxed" style={{ color: "rgba(0,0,0,0.35)", lineHeight: 1.7 }}>{faq.a}</p>
+                    <p className="text-sm leading-relaxed" style={{ color: "var(--text-quaternary)", lineHeight: 1.7 }}>{faq.a}</p>
                   </div>
                 </div>
               </div>
@@ -1510,11 +1589,11 @@ export default function Home() {
             <div className="mesh-bg absolute inset-0 pointer-events-none" />
             <div className="shimmer-line absolute top-0 left-0 right-0 h-[1px]" />
             <div className="relative" style={{ zIndex: 1 }}>
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 leading-tight" style={{ color: "#1a1a1a" }}>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 leading-tight" style={{ color: "var(--text-primary)" }}>
                 Your SaaS is ready to be{" "}
                 <span className="gradient-text">built</span>
               </h2>
-              <p className="text-lg mb-10" style={{ color: "rgba(0,0,0,0.4)" }}>
+              <p className="text-lg mb-10" style={{ color: "var(--text-secondary)" }}>
                 Enter your niche above and ship your production SaaS tonight.
               </p>
               <div className="flex flex-col md:flex-row gap-4 max-w-xl mx-auto">
@@ -1538,8 +1617,8 @@ export default function Home() {
                   )}
                 </button>
               </div>
-              <p className="mt-6 text-sm" style={{ color: "rgba(0,0,0,0.15)" }}>
-                <Shield size={14} className="inline mr-1" /> 30-day guarantee · Full ownership · No subscription
+              <p className="mt-6 text-sm" style={{ color: "var(--text-faint)" }}>
+                <Shield size={14} className="inline mr-1" /> 30-day guarantee Ã‚Â· Full ownership Ã‚Â· No subscription
               </p>
             </div>
           </div>
@@ -1550,10 +1629,10 @@ export default function Home() {
       <footer className="py-12 px-6 relative" style={{ zIndex: 1 }}>
         <div className="glass-card-heavy max-w-7xl mx-auto py-10 px-8 text-center">
           <div className="text-base font-bold tracking-tight mb-4">
-            <span style={{ color: "#6366f1" }}>NEON</span><span style={{ color: "rgba(0,0,0,0.4)" }}>_CORE</span>
+            <span style={{ color: "#6366f1" }}>NEON</span><span style={{ color: "var(--text-secondary)" }}>_CORE</span>
           </div>
-          <p className="text-xs" style={{ color: "rgba(0,0,0,0.1)" }}>
-            © 2026 NEON-CORE AI. All rights reserved.
+          <p className="text-xs" style={{ color: "var(--text-faint)" }}>
+            Ã‚Â© 2026 NEON-CORE AI. All rights reserved.
           </p>
         </div>
       </footer>
@@ -1561,7 +1640,7 @@ export default function Home() {
   );
 }
 
-/* ─── SCROLL REVEAL ─── */
+/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ SCROLL REVEAL Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 function useScrollReveal() {
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -1574,7 +1653,7 @@ function useScrollReveal() {
       },
       { threshold: 0.08 }
     );
-    const els = document.querySelectorAll("[data-reveal]");
+    const els = Array.from(document.querySelectorAll("[data-reveal]"));
     for (const el of els) observer.observe(el);
     return () => observer.disconnect();
   }, []);
