@@ -891,45 +891,20 @@ function ScannerLine() {
 }
 
 /* ─── CONTINENT OUTLINES ─── */
-const CONTINENTS: { name: string; points: [number, number][] }[] = [
-  { name: "North America", points: [
-    [52,-128],[48,-124],[42,-124],[36,-120],[32,-116],[28,-112],[25,-108],[22,-104],[20,-100],[18,-96],[16,-92],[14,-88],[12,-84],[10,-80],[10,-76],[12,-72],[15,-68],[18,-64],[22,-70],[25,-75],[28,-80],[30,-85],[34,-78],[38,-76],[42,-72],[46,-66],[50,-56],[52,-58],[54,-58],[58,-64],[62,-70],[66,-78],[68,-86],[70,-94],[70,-102],[70,-110],[70,-118],[70,-126],[68,-134],[64,-140],[60,-146],[56,-136],[52,-130] ]},
-  { name: "South America", points: [
-    [10,-76],[12,-72],[12,-68],[10,-62],[8,-56],[5,-52],[2,-50],[0,-50],[-2,-48],[-5,-36],[-8,-36],[-12,-38],[-16,-40],[-20,-42],[-24,-44],[-28,-48],[-32,-52],[-36,-56],[-40,-60],[-44,-64],[-48,-68],[-52,-70],[-55,-66],[-54,-62],[-50,-72],[-46,-74],[-42,-76],[-38,-72],[-34,-70],[-30,-68],[-26,-68],[-22,-66],[-18,-62],[-14,-58],[-10,-64],[-6,-72],[-2,-76],[2,-78],[6,-76],[8,-76] ]},
-  { name: "Europe", points: [
-    [36,-6],[38,-4],[40,-2],[42,-4],[44,-2],[46,-2],[48,-4],[50,-2],[52,-2],[54,-2],[56,-4],[58,-4],[60,-4],[62,-6],[64,-10],[66,-14],[68,-18],[70,-22],[70,-26],[70,-30],[68,-28],[66,-26],[64,-24],[62,-22],[60,-26],[58,-30],[56,-34],[54,-36],[52,-40],[50,-38],[48,-36],[46,-32],[44,-28],[42,-24],[40,-20],[38,-16] ]},
-  { name: "Africa", points: [
-    [36,-4],[36,0],[36,4],[34,8],[32,12],[30,16],[28,20],[26,24],[24,28],[22,32],[20,36],[18,38],[16,40],[14,42],[12,42],[10,42],[8,42],[6,42],[4,42],[2,42],[0,42],[-2,42],[-4,42],[-6,40],[-8,38],[-10,40],[-12,40],[-14,38],[-16,36],[-18,36],[-20,36],[-22,34],[-24,34],[-26,32],[-28,30],[-30,28],[-32,22],[-34,18],[-34,14],[-32,10],[-30,8],[-28,12],[-26,14],[-24,14],[-22,14],[-20,12],[-18,12],[-16,10],[-14,8],[-12,6],[-10,4],[-8,2],[-6,2],[-4,2],[-2,2],[0,4],[2,4],[4,4],[6,2],[8,0],[10,-4],[12,-8],[14,-12],[16,-14],[18,-14],[20,-16],[22,-16],[24,-14],[26,-12],[28,-10],[30,-8],[32,-6] ]},
-  { name: "Asia", points: [
-    [70,-24],[72,-30],[74,-36],[74,-44],[74,-52],[74,-60],[74,-68],[74,-76],[74,-84],[74,-92],[74,-100],[74,-108],[74,-116],[74,-124],[74,-132],[74,-140],[74,-148],[74,-156],[74,-164],[72,-170],[70,-174],[68,-178],[64,-176],[60,-174],[56,-136],[52,-132],[48,-130],[44,-132],[40,-128],[36,-124],[32,-120],[28,-118],[24,-114],[20,-108],[16,-104],[12,-100],[8,-96],[4,-92],[2,-88],[0,-84],[-2,-80],[-4,-76],[-6,-72],[-4,-68],[0,-64],[4,-60],[8,-56],[12,-52],[16,-48],[20,-44],[24,-40],[28,-36],[32,-32],[36,-28],[38,-24],[40,-20],[42,-16],[44,-18],[46,-22],[48,-26],[50,-28],[52,-30],[54,-32],[56,-34],[58,-32],[60,-28],[62,-24],[64,-22],[66,-20],[68,-22] ]},
-  { name: "Australia", points: [
-    [-12,130],[-12,134],[-14,138],[-16,140],[-18,142],[-20,144],[-22,146],[-24,148],[-26,150],[-28,152],[-30,154],[-32,156],[-34,158],[-36,160],[-38,162],[-40,164],[-42,166],[-42,170],[-40,172],[-38,174],[-36,176],[-34,178],[-32,180],[-30,180],[-28,178],[-26,176],[-24,174],[-22,172],[-20,170],[-18,168],[-18,164],[-18,160],[-18,156],[-16,152],[-14,148],[-12,144],[-12,140],[-12,136] ]},
-  { name: "Greenland", points: [
-    [76,-18],[78,-22],[80,-28],[82,-34],[82,-40],[82,-46],[82,-52],[82,-58],[80,-62],[78,-64],[76,-66],[74,-64],[72,-60],[70,-56],[68,-52],[66,-48],[64,-44],[62,-40],[62,-36],[64,-32],[66,-28],[68,-24],[70,-20],[72,-16] ]},
-];
-
-const CITIES: { name: string; lat: number; lng: number }[] = [
-  { name: "New York", lat: 40.7, lng: -74 },
-  { name: "London", lat: 51.5, lng: -0.1 },
-  { name: "Tokyo", lat: 35.7, lng: 139.7 },
-  { name: "Sydney", lat: -33.9, lng: 151.2 },
-  { name: "São Paulo", lat: -23.5, lng: -46.6 },
-  { name: "Dubai", lat: 25.2, lng: 55.3 },
-  { name: "Singapore", lat: 1.3, lng: 103.8 },
-  { name: "San Francisco", lat: 37.8, lng: -122.4 },
-  { name: "Berlin", lat: 52.5, lng: 13.4 },
-  { name: "Mumbai", lat: 19.1, lng: 72.9 },
-  { name: "Cape Town", lat: -33.9, lng: 18.4 },
-  { name: "Seoul", lat: 37.6, lng: 127 },
-  { name: "Lagos", lat: 6.5, lng: 3.4 },
-  { name: "Mexico City", lat: 19.4, lng: -99.1 },
-  { name: "Moscow", lat: 55.8, lng: 37.6 },
+const CITIES: { lat: number; lng: number }[] = [
+  { lat: 40.7, lng: -74 },   { lat: 51.5, lng: -0.1 },
+  { lat: 35.7, lng: 139.7 }, { lat: -33.9, lng: 151.2 },
+  { lat: -23.5, lng: -46.6 }, { lat: 25.2, lng: 55.3 },
+  { lat: 1.3, lng: 103.8 },  { lat: 37.8, lng: -122.4 },
+  { lat: 52.5, lng: 13.4 },  { lat: 19.1, lng: 72.9 },
+  { lat: -33.9, lng: 18.4 }, { lat: 37.6, lng: 127 },
+  { lat: 6.5, lng: 3.4 },    { lat: 19.4, lng: -99.1 },
+  { lat: 55.8, lng: 37.6 },  { lat: -22.9, lng: -43.2 },
+  { lat: 41.0, lng: 28.9 },  { lat: 31.2, lng: 121.5 },
 ];
 
 const CONNECTIONS: [number, number][] = [
-  [0, 1], [1, 3], [1, 4], [0, 4], [2, 6], [2, 9], [2, 11],
-  [5, 9], [5, 12], [7, 0], [7, 1], [8, 1], [10, 12], [13, 0],
-  [14, 8], [3, 6], [9, 6],
+  [0,1],[1,3],[1,4],[0,4],[2,6],[2,9],[2,11],[7,0],[7,1],[8,1],[10,12],[13,0],[14,8],[3,6],[9,6],[5,9],[5,12],[15,0],[16,8],[17,2],[17,6],
 ];
 
 /* ─── 3D GLOBE SECTION ─── */
@@ -941,16 +916,14 @@ function GlobeSection() {
     const canvas = canvasRef.current;
     const section = sectionRef.current;
     if (!canvas || !section) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d")!;
     if (!ctx) return;
 
     let animId: number;
-    let velY = 0;
-    let velX = 0;
-    let rotX = 0.4;
+    let targetRotY = 0;
+    let targetRotX = 0.3;
+    let rotX = 0.3;
     let rotY = 0;
-    let prevMouse = { x: 0, y: 0 };
-    let mouseActive = false;
     let animTime = 0;
 
     const resize = () => {
@@ -962,35 +935,20 @@ function GlobeSection() {
     };
     resize();
     window.addEventListener("resize", resize);
-
     const observer = new ResizeObserver(resize);
     observer.observe(section);
 
-    const onMouseDown = () => { mouseActive = true; };
-    const onMouseUp = () => { mouseActive = false; };
-    const onMouseLeave = () => { mouseActive = false; };
-
-    const onMouseMove = (e: MouseEvent) => {
+    const onMove = (e: MouseEvent) => {
       const rect = section.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
-
-      if (mouseActive && mx >= 0 && my >= 0 && mx <= rect.width && my <= rect.height) {
-        const dx = mx - prevMouse.x;
-        const dy = my - prevMouse.y;
-        velY += dy * 0.008;
-        velX += dx * 0.008;
-      }
-      prevMouse = { x: mx, y: my };
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      targetRotY = (x - 0.5) * 1.8;
+      targetRotX = 0.3 + (y - 0.5) * -0.6;
     };
+    section.addEventListener("mousemove", onMove);
 
-    section.addEventListener("mousedown", onMouseDown);
-    window.addEventListener("mouseup", onMouseUp);
-    section.addEventListener("mouseleave", onMouseLeave);
-    section.addEventListener("mousemove", onMouseMove);
-
-    const latSteps = 22;
-    const lngSteps = 30;
+    const latSteps = 18;
+    const lngSteps = 24;
     const wireframe: { theta: number; phi: number }[] = [];
     for (let i = 0; i <= latSteps; i++) {
       const theta = (i / latSteps) * Math.PI;
@@ -1000,24 +958,18 @@ function GlobeSection() {
       }
     }
 
-    function rotateX(p: { x: number; y: number; z: number }, angle: number) {
-      const c = Math.cos(angle), s = Math.sin(angle);
+    function rotateX(p: { x: number; y: number; z: number }, a: number) {
+      const c = Math.cos(a), s = Math.sin(a);
       return { x: p.x, y: p.y * c - p.z * s, z: p.y * s + p.z * c };
     }
-
-    function rotateY(p: { x: number; y: number; z: number }, angle: number) {
-      const c = Math.cos(angle), s = Math.sin(angle);
+    function rotateY(p: { x: number; y: number; z: number }, a: number) {
+      const c = Math.cos(a), s = Math.sin(a);
       return { x: p.x * c + p.z * s, y: p.y, z: -p.x * s + p.z * c };
     }
-
     function latLngTo3D(lat: number, lng: number, radius: number) {
       const theta = (90 - lat) * Math.PI / 180;
       const phi = lng * Math.PI / 180;
-      return {
-        x: radius * Math.sin(theta) * Math.cos(phi),
-        y: radius * Math.cos(theta),
-        z: radius * Math.sin(theta) * Math.sin(phi),
-      };
+      return { x: radius * Math.sin(theta) * Math.cos(phi), y: radius * Math.cos(theta), z: radius * Math.sin(theta) * Math.sin(phi) };
     }
 
     const draw = () => {
@@ -1029,239 +981,137 @@ function GlobeSection() {
       const cy = h * 0.5;
       const r = Math.min(w, h) * 0.38;
 
-      velX *= 0.97;
-      velY *= 0.97;
-      rotX += velY;
-      rotY += velX;
-      rotY += 0.003;
+      rotY += (targetRotY - rotY) * 0.04;
+      rotX += (targetRotX - rotX) * 0.04;
+      rotY += 0.005;
       animTime += 0.02;
 
-      const rotXAbs = rotX;
-      const rotYAbs = rotY;
-
-      const proj3D = (p: { x: number; y: number; z: number }) => {
-        let pos = rotateX(p, rotXAbs);
-        pos = rotateY(pos, rotYAbs);
-        const persp = 500 / (500 + pos.z);
-        return { x: cx + pos.x * persp, y: cy + pos.y * persp, z: pos.z };
+      const proj3D = (pos: { x: number; y: number; z: number }) => {
+        let p = rotateX(pos, rotX);
+        p = rotateY(p, rotY);
+        const persp = 500 / (500 + p.z);
+        return { x: cx + p.x * persp, y: cy + p.y * persp, z: p.z };
       };
 
-      const wireframeProj = wireframe.map((p) => {
+      const wireProj = wireframe.map((p) => {
         const rad = r;
-        const pos = {
-          x: rad * Math.sin(p.theta) * Math.cos(p.phi),
-          y: rad * Math.cos(p.theta),
-          z: rad * Math.sin(p.theta) * Math.sin(p.phi),
-        };
-        return proj3D(pos);
+        return proj3D({ x: rad * Math.sin(p.theta) * Math.cos(p.phi), y: rad * Math.cos(p.theta), z: rad * Math.sin(p.theta) * Math.sin(p.phi) });
       });
 
-      function drawSphereShade(ctx2: CanvasRenderingContext2D) {
-        const lightDir = { x: -0.3, y: -0.5, z: 0.8 };
-        const len = Math.sqrt(lightDir.x ** 2 + lightDir.y ** 2 + lightDir.z ** 2);
-        lightDir.x /= len; lightDir.y /= len; lightDir.z /= len;
-
-        for (let i = 0; i < 7; i++) {
-          const theta = ((i + 0.5) / 7) * Math.PI;
-          const ringR = r * Math.sin(theta);
-          const ringY = r * Math.cos(theta);
-          for (let j = 0; j < 14; j++) {
-            const phi = ((j + 0.5) / 14) * Math.PI * 2;
-            const x = ringR * Math.cos(phi);
-            const z = ringR * Math.sin(phi);
-            let pos = rotateX({ x, y: ringY, z }, rotXAbs);
-            pos = rotateY(pos, rotYAbs);
-            const nx = rotateX({ x: Math.sin(theta) * Math.cos(phi), y: Math.cos(theta), z: Math.sin(theta) * Math.sin(phi) }, rotXAbs);
-            const n = rotateY(nx, rotYAbs);
-            const dot = n.x * lightDir.x + n.y * lightDir.y + n.z * lightDir.z;
-            if (pos.z > -r * 0.05) {
-              const shade = 0.08 + Math.max(0, dot) * 0.1;
-              ctx2.fillStyle = `rgba(99, 102, 241, ${shade})`;
-              const pp = proj3D({ x, y: ringY, z });
-              const dotR = r * 0.035;
-              ctx2.beginPath();
-              ctx2.arc(pp.x, pp.y, dotR, 0, Math.PI * 2);
-              ctx2.fill();
-            }
-          }
-        }
-      }
-
-      function drawLatLines(ctx2: CanvasRenderingContext2D) {
-        for (let lat = -60; lat <= 60; lat += 30) {
-          const pts: { x: number; y: number; z: number }[] = [];
-          for (let lng = 0; lng <= 360; lng += 3) {
-            const theta = (90 - lat) * Math.PI / 180;
-            const phi = lng * Math.PI / 180;
-            pts.push({ x: r * Math.sin(theta) * Math.cos(phi), y: r * Math.cos(theta), z: r * Math.sin(theta) * Math.sin(phi) });
-          }
-          for (let i = 0; i < pts.length - 1; i++) {
-            const p1 = proj3D(pts[i]);
-            const p2 = proj3D(pts[i + 1]);
-            if (p1.z > -r * 0.1 || p2.z > -r * 0.1) {
-              const isEq = lat === 0;
-              ctx2.beginPath();
-              ctx2.moveTo(p1.x, p1.y);
-              ctx2.lineTo(p2.x, p2.y);
-              ctx2.strokeStyle = isEq ? "rgba(167, 139, 250, 0.1)" : "rgba(139, 92, 246, 0.035)";
-              ctx2.lineWidth = isEq ? 0.7 : 0.3;
-              ctx2.stroke();
-            }
-          }
-        }
-      }
-
-      function drawWireframe(ctx2: CanvasRenderingContext2D) {
+      function drawGrid() {
         for (let i = 1; i < latSteps; i++) {
           for (let j = 0; j < lngSteps; j++) {
-            const idx = i * (lngSteps + 1) + j;
-            const pp1 = wireframeProj[idx];
-            const pp2 = wireframeProj[idx + 1];
-            if (pp1.z > -r * 0.2 || pp2.z > -r * 0.2) {
-              const alpha = Math.max(0.03, (pp1.z / r + 1) * 0.07 + 0.025);
-              ctx2.beginPath();
-              ctx2.moveTo(pp1.x, pp1.y);
-              ctx2.lineTo(pp2.x, pp2.y);
-              ctx2.strokeStyle = `rgba(167, 139, 250, ${alpha})`;
-              ctx2.lineWidth = 0.2;
-              ctx2.stroke();
+            const p = wireProj[i * (lngSteps + 1) + j];
+            const q = wireProj[i * (lngSteps + 1) + j + 1];
+            if (p.z > -r * 0.2 || q.z > -r * 0.2) {
+              const a = Math.max(0.03, (p.z / r + 1) * 0.06 + 0.02);
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(q.x, q.y);
+              ctx.strokeStyle = `rgba(167, 139, 250, ${a})`;
+              ctx.lineWidth = 0.2;
+              ctx.stroke();
             }
           }
         }
         for (let j = 0; j <= lngSteps; j++) {
           for (let i = 0; i < latSteps; i++) {
-            const idx = i * (lngSteps + 1) + j;
-            const pp1 = wireframeProj[idx];
-            const pp2 = wireframeProj[(i + 1) * (lngSteps + 1) + j];
-            if (pp1.z > -r * 0.2 || pp2.z > -r * 0.2) {
-              const alpha = Math.max(0.03, (pp1.z / r + 1) * 0.07 + 0.025);
-              ctx2.beginPath();
-              ctx2.moveTo(pp1.x, pp1.y);
-              ctx2.lineTo(pp2.x, pp2.y);
-              ctx2.strokeStyle = `rgba(139, 92, 246, ${alpha})`;
-              ctx2.lineWidth = 0.2;
-              ctx2.stroke();
+            const p = wireProj[i * (lngSteps + 1) + j];
+            const q = wireProj[(i + 1) * (lngSteps + 1) + j];
+            if (p.z > -r * 0.2 || q.z > -r * 0.2) {
+              const a = Math.max(0.03, (p.z / r + 1) * 0.06 + 0.02);
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(q.x, q.y);
+              ctx.strokeStyle = `rgba(139, 92, 246, ${a})`;
+              ctx.lineWidth = 0.2;
+              ctx.stroke();
             }
           }
         }
       }
 
-      function drawContinents(ctx2: CanvasRenderingContext2D) {
-        for (const cont of CONTINENTS) {
-          const pts3D = cont.points.map(([lat, lng]) => latLngTo3D(lat, lng, r * 1.002));
-          const projected = pts3D.map((p) => proj3D(p));
-          let avgZ = 0;
-          for (const p of projected) avgZ += p.z;
-          avgZ /= projected.length;
-          if (avgZ > -r * 0.15) {
-            const depth = (avgZ / r + 1) * 0.5;
-            const alpha = Math.max(0.35, Math.min(0.7, depth * 0.55 + 0.2));
-            const bright = Math.max(0.2, Math.min(0.5, depth * 0.45 + 0.1));
-            ctx2.beginPath();
-            ctx2.moveTo(projected[0].x, projected[0].y);
-            for (let i = 1; i < projected.length; i++) ctx2.lineTo(projected[i].x, projected[i].y);
-            ctx2.closePath();
-            ctx2.fillStyle = `rgba(${99 + 50 * bright}, ${70 + 30 * bright}, ${220 + 20 * bright}, ${alpha})`;
-            ctx2.fill();
-            ctx2.strokeStyle = `rgba(167, 139, 250, ${alpha * 0.25})`;
-            ctx2.lineWidth = 0.35;
-            ctx2.stroke();
-          }
+      function drawNodes() {
+        const city3D = CITIES.map((c) => latLngTo3D(c.lat, c.lng, r * 1.004));
+        for (let i = 0; i < CITIES.length; i++) {
+          const p = proj3D(city3D[i]);
+          if (p.z < -r * 0.1) continue;
+          const d = (p.z / r + 1) * 0.5;
+          const pulse = 0.6 + 0.4 * Math.sin(animTime * 1.5 + i * 2.1);
+          const a = Math.max(0.4, d * 0.9) * pulse;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 2 + d * 1.5, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(167, 139, 250, ${a})`;
+          ctx.fill();
+
+          const gr = 6 + d * 6;
+          const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, gr);
+          g.addColorStop(0, `rgba(167, 139, 250, ${a * 0.4})`);
+          g.addColorStop(1, "transparent");
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, gr, 0, Math.PI * 2);
+          ctx.fill();
         }
       }
 
-      function drawConnections(ctx2: CanvasRenderingContext2D) {
-        const city3D = CITIES.map((c) => latLngTo3D(c.lat, c.lng, r * 1.002));
+      function drawArcs() {
+        const city3D = CITIES.map((c) => latLngTo3D(c.lat, c.lng, r * 1.004));
         for (const [ci, cj] of CONNECTIONS) {
           const p1 = proj3D(city3D[ci]);
           const p2 = proj3D(city3D[cj]);
           if (p1.z < -r * 0.1 || p2.z < -r * 0.1) continue;
-          const steps = 36;
-          const arcPts: { x: number; y: number }[] = [];
-          for (let s = 0; s <= steps; s++) {
+          const steps = 30;
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          for (let s = 1; s <= steps; s++) {
             const t = s / steps;
             const mid = {
               x: city3D[ci].x + (city3D[cj].x - city3D[ci].x) * t,
-              y: city3D[ci].y + (city3D[cj].y - city3D[ci].y) * t - Math.sin(t * Math.PI) * r * 0.2,
+              y: city3D[ci].y + (city3D[cj].y - city3D[ci].y) * t - Math.sin(t * Math.PI) * r * 0.22,
               z: city3D[ci].z + (city3D[cj].z - city3D[ci].z) * t,
             };
-            arcPts.push(proj3D(mid));
+            const pp = proj3D(mid);
+            ctx.lineTo(pp.x, pp.y);
           }
           const avgZ = (p1.z + p2.z) / 2;
-          const alpha = Math.max(0.06, (avgZ / r + 1) * 0.09);
-          ctx2.beginPath();
-          ctx2.moveTo(arcPts[0].x, arcPts[0].y);
-          for (let s = 1; s <= steps; s++) ctx2.lineTo(arcPts[s].x, arcPts[s].y);
-          ctx2.strokeStyle = `rgba(167, 139, 250, ${alpha})`;
-          ctx2.lineWidth = 0.7;
-          ctx2.stroke();
+          const a = Math.max(0.05, (avgZ / r + 1) * 0.08);
+          ctx.strokeStyle = `rgba(167, 139, 250, ${a})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
 
-          const flowT = (animTime * 0.12 + (ci + cj) * 0.15) % 1;
-          const fi = Math.min(Math.floor(flowT * steps), steps);
-          ctx2.beginPath();
-          ctx2.arc(arcPts[fi].x, arcPts[fi].y, 1.8, 0, Math.PI * 2);
-          ctx2.fillStyle = `rgba(167, 139, 250, ${alpha * 2})`;
-          ctx2.fill();
+          const flow = (animTime * 0.1 + (ci + cj) * 0.1) % 1;
+          const fi = Math.floor(flow * steps);
+          const arcPts: { x: number; y: number }[] = [];
+          for (let s = 0; s <= steps; s++) {
+            const t = s / steps;
+            arcPts.push(proj3D({
+              x: city3D[ci].x + (city3D[cj].x - city3D[ci].x) * t,
+              y: city3D[ci].y + (city3D[cj].y - city3D[ci].y) * t - Math.sin(t * Math.PI) * r * 0.22,
+              z: city3D[ci].z + (city3D[cj].z - city3D[ci].z) * t,
+            }));
+          }
+          ctx.beginPath();
+          ctx.arc(arcPts[fi].x, arcPts[fi].y, 1.5, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(167, 139, 250, ${a * 2})`;
+          ctx.fill();
         }
       }
 
-      function drawCities(ctx2: CanvasRenderingContext2D) {
-        const city3D = CITIES.map((c) => latLngTo3D(c.lat, c.lng, r * 1.002));
-        for (let i = 0; i < CITIES.length; i++) {
-          const proj = proj3D(city3D[i]);
-          if (proj.z < -r * 0.05) continue;
-          const depth = (proj.z / r + 1) * 0.5;
-          const pulse = 0.6 + 0.4 * Math.sin(animTime * 2 + i * 1.7);
-          const alpha = Math.max(0.35, depth * 0.85) * pulse;
-
-          ctx2.beginPath();
-          ctx2.arc(proj.x, proj.y, 2.5 + depth * 2, 0, Math.PI * 2);
-          ctx2.fillStyle = `rgba(167, 139, 250, ${alpha})`;
-          ctx2.fill();
-
-          const glowR = 8 + depth * 8;
-          const g = ctx2.createRadialGradient(proj.x, proj.y, 0, proj.x, proj.y, glowR);
-          g.addColorStop(0, `rgba(167, 139, 250, ${alpha * 0.5})`);
-          g.addColorStop(1, "transparent");
-          ctx2.fillStyle = g;
-          ctx2.beginPath();
-          ctx2.arc(proj.x, proj.y, glowR, 0, Math.PI * 2);
-          ctx2.fill();
-
-          ctx2.beginPath();
-          ctx2.arc(proj.x, proj.y, 1, 0, Math.PI * 2);
-          ctx2.fillStyle = `rgba(255, 255, 255, ${alpha * 0.4})`;
-          ctx2.fill();
-        }
+      function drawGlow() {
+        const g = ctx.createRadialGradient(cx, cy, r * 0.2, cx, cy, r * 1.6);
+        g.addColorStop(0, "rgba(99, 102, 241, 0.04)");
+        g.addColorStop(0.4, "rgba(139, 92, 246, 0.02)");
+        g.addColorStop(1, "transparent");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, w, h);
       }
 
-      drawSphereShade(ctx);
-      drawContinents(ctx);
-      drawLatLines(ctx);
-      drawConnections(ctx);
-      drawCities(ctx);
-      drawWireframe(ctx);
-
-      const glow = ctx.createRadialGradient(cx, cy, r * 0.3, cx, cy, r * 1.6);
-      glow.addColorStop(0, "rgba(99, 102, 241, 0.04)");
-      glow.addColorStop(0.3, "rgba(139, 92, 246, 0.025)");
-      glow.addColorStop(0.6, "rgba(167, 139, 250, 0.012)");
-      glow.addColorStop(1, "transparent");
-      ctx.fillStyle = glow;
-      ctx.fillRect(0, 0, w, h);
-
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 1.02, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(167, 139, 250, 0.06)";
-      ctx.lineWidth = 0.6;
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 1.08, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(99, 102, 241, 0.03)";
-      ctx.lineWidth = 0.3;
-      ctx.stroke();
-
+      drawGrid();
+      drawNodes();
+      drawArcs();
+      drawGlow();
       animId = requestAnimationFrame(draw);
     };
     draw();
@@ -1270,15 +1120,12 @@ function GlobeSection() {
       cancelAnimationFrame(animId);
       observer.disconnect();
       window.removeEventListener("resize", resize);
-      section.removeEventListener("mousedown", onMouseDown);
-      window.removeEventListener("mouseup", onMouseUp);
-      section.removeEventListener("mouseleave", onMouseLeave);
-      section.removeEventListener("mousemove", onMouseMove);
+      section.removeEventListener("mousemove", onMove);
     };
   }, []);
 
   const globeStats = [
-    { value: "200+", label: "Countries supported" },
+    { value: "200+", label: "Countries reached" },
     { value: "48ms", label: "Avg. latency" },
     { value: "99.9%", label: "Uptime SLA" },
   ];
@@ -1294,13 +1141,13 @@ function GlobeSection() {
             Global <span className="gradient-text">Infrastructure</span>
           </h2>
           <p className="text-lg mt-3" style={{ color: "var(--text-quaternary)" }}>
-            Drag the globe. Deployed everywhere.
+            Move your mouse to explore.
           </p>
         </div>
         <div className="grid md:grid-cols-5 gap-6 items-stretch">
           <div
             className="md:col-span-3 glass-card-gradient relative overflow-hidden"
-            style={{ height: "460px", padding: 0, cursor: "grab" }}
+            style={{ height: "440px", padding: 0, cursor: "default" }}
             data-card-spotlight
             ref={sectionRef}
           >
@@ -1341,7 +1188,7 @@ function GlobeSection() {
                 Powered by NEON-CORE
               </p>
               <p className="text-xs" style={{ color: "var(--text-faint)" }}>
-                Click & drag to explore
+                Global edge network
               </p>
             </div>
           </div>
