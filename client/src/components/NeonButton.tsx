@@ -47,7 +47,7 @@ export const NeonButton: React.FC<NeonButtonProps> = ({
         ${className}
       `}
       style={{
-        background: "rgba(255,255,255,0.5)",
+        background: "var(--card-bg)",
         backdropFilter: "blur(12px)",
         WebkitBackdropFilter: "blur(12px)",
         border: `1px solid ${hexColor}20`,
@@ -58,7 +58,7 @@ export const NeonButton: React.FC<NeonButtonProps> = ({
         e.currentTarget.style.borderColor = `${hexColor}50`;
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.background = "rgba(255,255,255,0.5)";
+        e.currentTarget.style.background = "var(--card-bg)";
         e.currentTarget.style.borderColor = `${hexColor}20`;
       }}
     >

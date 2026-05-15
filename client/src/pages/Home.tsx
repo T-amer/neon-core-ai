@@ -202,7 +202,7 @@ const styles = `
   background: rgba(255,255,255,0.75);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(0,0,0,0.04);
+  border-bottom: 1px solid var(--border-faint);
   transition: background 0.4s ease, backdrop-filter 0.4s ease, box-shadow 0.4s ease;
 }
 
@@ -241,11 +241,11 @@ const styles = `
   background: rgba(255,255,255,0.5);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0,0,0,0.06);
+  border: 1px solid var(--border-faint);
   border-radius: 12px;
   padding: 14px 20px;
   font-size: 15px;
-  color: #1a1a1a;
+  color: var(--text-primary);
   outline: none;
   transition: all 0.3s ease;
   width: 100%;
@@ -719,7 +719,7 @@ function Counter({ to, prefix = "", suffix = "", label }: { to: number; prefix?:
       <p className="text-4xl font-bold tracking-tight" style={{ color: "#6366f1" }}>
         {prefix}{count}{suffix}
       </p>
-      <p className="text-sm mt-2" style={{ color: "rgba(0,0,0,0.3)" }}>{label}</p>
+      <p className="text-sm mt-2" style={{ color: "var(--text-quaternary)" }}>{label}</p>
     </div>
   );
 }
@@ -932,7 +932,7 @@ export default function Home() {
   ];
 
   return (
-    <div ref={mainRef} style={{ backgroundColor: "#f8f9fb", color: "#1a1a1a", minHeight: "100vh" }}>
+    <div ref={mainRef} style={{ backgroundColor: "#f8f9fb", color: "var(--text-primary)", minHeight: "100vh" }}>
       <style>{styles}</style>
 
       {/* GRAIN OVERLAY */}
@@ -981,12 +981,12 @@ export default function Home() {
         style={{
           background: navScrolled ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.7)",
           backdropFilter: navScrolled ? "blur(32px)" : "blur(20px)",
-          boxShadow: navScrolled ? "0 1px 40px rgba(0,0,0,0.04)" : "none",
+          boxShadow: navScrolled ? "0 1px 40px var(--border-faint)" : "none",
         }}
       >
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="text-lg font-bold tracking-tight">
-            <span style={{ color: "#6366f1" }}>NEON</span><span style={{ color: "rgba(0,0,0,0.8)" }}>_CORE</span>
+            <span style={{ color: "#6366f1" }}>NEON</span><span style={{ color: "var(--text-strong)" }}>_CORE</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
@@ -994,9 +994,9 @@ export default function Home() {
                 key={link.id}
                 onClick={() => scrollTo(link.id)}
                 className="text-sm transition-all relative group"
-                style={{ color: "rgba(0,0,0,0.4)", fontWeight: 500 }}
-                onMouseEnter={(e) => e.currentTarget.style.color = "rgba(0,0,0,0.8)"}
-                onMouseLeave={(e) => e.currentTarget.style.color = "rgba(0,0,0,0.4)"}
+                style={{ color: "var(--text-quaternary)", fontWeight: 500 }}
+                onMouseEnter={(e) => e.currentTarget.style.color = "var(--text-strong)"}
+                onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-quaternary)"}
               >
                 {link.label}
                 <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-indigo-500 transition-all duration-300 group-hover:w-full" style={{ background: "#6366f1", borderRadius: 1 }} />
@@ -1008,7 +1008,7 @@ export default function Home() {
             className="md:hidden p-2"
             aria-label="Menu"
           >
-            {isMenuOpen ? <X size={20} style={{ color: "rgba(0,0,0,0.5)" }} /> : <Menu size={20} style={{ color: "rgba(0,0,0,0.5)" }} />}
+            {isMenuOpen ? <X size={20} style={{ color: "var(--text-tertiary)" }} /> : <Menu size={20} style={{ color: "var(--text-tertiary)" }} />}
           </button>
         </div>
         {isMenuOpen && (
@@ -1018,7 +1018,7 @@ export default function Home() {
                 key={link.id}
                 onClick={() => scrollTo(link.id)}
                 className="block w-full text-left py-3 px-4 rounded-lg text-sm"
-                style={{ color: "rgba(0,0,0,0.6)", background: "rgba(0,0,0,0.02)" }}
+                style={{ color: "var(--text-tertiary)", background: "var(--bg-faint)" }}
               >
                 {link.label}
               </button>
@@ -1089,7 +1089,7 @@ export default function Home() {
                 in <span style={{ color: "#6366f1" }}>48 hours</span>
               </h1>
               <div className="h-8 mb-8" data-reveal="fade-up" data-stagger="hero" style={{ transitionDelay: "0.25s" }}>
-                <span className="text-base md:text-lg" style={{ color: "rgba(0,0,0,0.3)" }}>
+                <span className="text-base md:text-lg" style={{ color: "var(--text-quaternary)" }}>
                   Built for{" "}
                   <span style={{ color: "#6366f1", fontWeight: 600 }}>{typewriterText}</span>
                   <span className="typewriter-cursor" />
@@ -1099,7 +1099,7 @@ export default function Home() {
                 className="text-lg md:text-xl max-w-3xl mx-auto mb-12"
                 data-reveal="fade-up"
                 data-stagger="hero"
-                style={{ color: "rgba(0,0,0,0.4)", lineHeight: 1.7, transitionDelay: "0.35s" }}
+                style={{ color: "var(--text-quaternary)", lineHeight: 1.7, transitionDelay: "0.35s" }}
               >
                 NEON-CORE AI generates a complete, production-ready Next.js SaaS boilerplate with authentication, payments, database, and deployment — tailored to your specific business niche.
               </p>
@@ -1133,7 +1133,7 @@ export default function Home() {
                 className="flex items-center justify-center gap-6 text-sm flex-wrap"
                 data-reveal="fade-up"
                 data-stagger="hero"
-                style={{ color: "rgba(0,0,0,0.25)", transitionDelay: "0.55s" }}
+                style={{ color: "var(--text-quaternary)", transitionDelay: "0.55s" }}
               >
                 <span className="flex items-center gap-1.5"><Shield size={14} /> 30-day guarantee</span>
                 <span className="flex items-center gap-1.5"><Check size={14} /> Full ownership</span>
@@ -1150,18 +1150,18 @@ export default function Home() {
         <section className="px-6 pb-24 -mt-16 relative" style={{ zIndex: 1 }}>
           <div className="max-w-4xl mx-auto" data-reveal="scale-in">
             <div className="glass-card-heavy overflow-hidden glow-border">
-              <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
+              <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1px solid var(--border-faint)" }}>
                 <div className="w-3 h-3 rounded-full" style={{ background: "#FF5F56" }} />
                 <div className="w-3 h-3 rounded-full" style={{ background: "#FFBD2E" }} />
                 <div className="w-3 h-3 rounded-full" style={{ background: "#27C93F" }} />
-                <span className="ml-3 text-xs" style={{ color: "rgba(0,0,0,0.15)" }}>generated-boilerplate.ts</span>
+                <span className="ml-3 text-xs" style={{ color: "var(--text-faint)" }}>generated-boilerplate.ts</span>
               </div>
-              <div className="h-80" style={{ background: "rgba(0,0,0,0.02)" }}>
+              <div className="h-80" style={{ background: "var(--bg-faint)" }}>
                 {isGenerating ? (
                   <div className="h-full flex items-center justify-center">
                     <div className="text-center">
                       <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: "#6366f1" }} />
-                      <p className="text-sm" style={{ color: "rgba(0,0,0,0.3)" }}>Generating your boilerplate...</p>
+                      <p className="text-sm" style={{ color: "var(--text-quaternary)" }}>Generating your boilerplate...</p>
                     </div>
                   </div>
                 ) : (
@@ -1179,7 +1179,7 @@ export default function Home() {
                 </button>
                 <button
                   className="glass-btn"
-                  style={{ borderColor: "rgba(0,0,0,0.1)", color: "rgba(0,0,0,0.5)" }}
+                  style={{ borderColor: "var(--text-faint)", color: "var(--text-tertiary)" }}
                   onClick={() => scrollTo("ai-advisor")}
                 >
                   Chat with AI Advisor
@@ -1193,14 +1193,14 @@ export default function Home() {
       {/* TRUST BAR (Marquee) */}
       <section className="py-20 px-6 relative" style={{ zIndex: 1 }}>
         <div className="glass-card-heavy max-w-5xl mx-auto py-12 px-8 text-center">
-          <p className="text-xs tracking-widest uppercase mb-8" style={{ color: "rgba(0,0,0,0.15)" }}>Trusted by founders and engineers at</p>
+          <p className="text-xs tracking-widest uppercase mb-8" style={{ color: "var(--text-faint)" }}>Trusted by founders and engineers at</p>
           <div className="marquee-track">
             <div className="marquee-content">
               {[...logos, ...logos].map((logo, i) => (
                 <span
                   key={i}
                   className="text-sm font-bold tracking-wider transition-all duration-300 hover:scale-110 flex-shrink-0"
-                  style={{ color: `rgba(0,0,0,${0.15 + (i % logos.length) * 0.03})` }}
+                  style={{ color: "var(--text-faint)" }}
                 >
                   {logo}
                 </span>
@@ -1219,7 +1219,7 @@ export default function Home() {
             <div className="flex justify-center mb-6">
               <div className="section-tag">Why NEON-CORE?</div>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4 leading-tight" style={{ color: "#1a1a1a" }}>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4 leading-tight" style={{ color: "var(--text-primary)" }}>
               The old way vs.{" "}
               <span className="gradient-text">the new way</span>
             </h2>
@@ -1229,7 +1229,7 @@ export default function Home() {
               <div className="section-tag" style={{ borderColor: "rgba(239,68,68,0.15)", background: "rgba(239,68,68,0.05)", color: "#ef4444" }}>
                 ✕ The Problem
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-6 leading-tight" style={{ color: "#1a1a1a" }}>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-6 leading-tight" style={{ color: "var(--text-primary)" }}>
                 Every month you wait is costing you{" "}
                 <span style={{ color: "#ef4444" }}>$10,000+</span>
               </h2>
@@ -1240,7 +1240,7 @@ export default function Home() {
                   "Your idea is validated. What's missing is the technical foundation to ship it",
                   "Competitors are launching and capturing market share every day",
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-base" style={{ color: "rgba(0,0,0,0.4)", lineHeight: 1.7 }}>
+                  <li key={i} className="flex items-start gap-3 text-base" style={{ color: "var(--text-quaternary)", lineHeight: 1.7 }}>
                     <span style={{ color: "#ef4444", marginTop: 5, flexShrink: 0 }}>✕</span>
                     {item}
                   </li>
@@ -1251,7 +1251,7 @@ export default function Home() {
               <div className="section-tag" style={{ borderColor: "rgba(5,150,105,0.15)", background: "rgba(5,150,105,0.05)", color: "#059669" }}>
                 ✓ The Solution
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-6 leading-tight" style={{ color: "#1a1a1a" }}>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-6 leading-tight" style={{ color: "var(--text-primary)" }}>
                 Production SaaS in{" "}
                 <span style={{ color: "#059669" }}>48 hours</span>
               </h2>
@@ -1262,7 +1262,7 @@ export default function Home() {
                   "Deploy to Vercel in one click. Live and accepting payments the same day",
                   "Full source code ownership. Extend it, scale it, own it. Zero lock-in",
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-base" style={{ color: "rgba(0,0,0,0.5)", lineHeight: 1.7 }}>
+                  <li key={i} className="flex items-start gap-3 text-base" style={{ color: "var(--text-tertiary)", lineHeight: 1.7 }}>
                     <span style={{ color: "#059669", marginTop: 5, flexShrink: 0 }}>✓</span>
                     {item}
                   </li>
@@ -1282,10 +1282,10 @@ export default function Home() {
             <div className="flex justify-center mb-6">
               <div className="section-tag pulse-soft"><Zap size={12} /> Features</div>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "#1a1a1a" }}>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "var(--text-primary)" }}>
               Everything you need to launch
             </h2>
-            <p className="text-lg max-w-3xl mx-auto" style={{ color: "rgba(0,0,0,0.4)" }}>
+            <p className="text-lg max-w-3xl mx-auto" style={{ color: "var(--text-quaternary)" }}>
               A complete production infrastructure, generated for your exact niche.
             </p>
           </div>
@@ -1298,11 +1298,11 @@ export default function Home() {
                 data-reveal="blur-in"
                 style={{ transitionDelay: `${i * 0.08}s` }}
               >
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-lg transition-all duration-300 group-hover:scale-110 group-hover:rotate-3" style={{ background: "rgba(99,102,241,0.08)" }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 text-lg transition-all duration-300 group-hover:scale-110 group-hover:rotate-3" style={{ background: "var(--accent-bg)" }}>
                   {feature.icon}
                 </div>
-                <h3 className="text-base font-semibold mb-3" style={{ color: "#1a1a1a" }}>{feature.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(0,0,0,0.4)", lineHeight: 1.7 }}>{feature.desc}</p>
+                <h3 className="text-base font-semibold mb-3" style={{ color: "var(--text-primary)" }}>{feature.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--text-quaternary)", lineHeight: 1.7 }}>{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -1318,10 +1318,10 @@ export default function Home() {
             <div className="flex justify-center mb-6">
               <div className="section-tag"><Star size={12} /> Testimonials</div>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "#1a1a1a" }}>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "var(--text-primary)" }}>
               Trusted by founders worldwide
             </h2>
-            <p className="text-lg" style={{ color: "rgba(0,0,0,0.4)" }}>
+            <p className="text-lg" style={{ color: "var(--text-quaternary)" }}>
               Here's what teams are saying after shipping with NEON-CORE.
             </p>
           </div>
@@ -1339,12 +1339,12 @@ export default function Home() {
                     <Star key={j} size={14} fill="#f59e0b" color="#f59e0b" />
                   ))}
                 </div>
-                <p className="text-sm mb-6 leading-relaxed" style={{ color: "rgba(0,0,0,0.45)", lineHeight: 1.7 }}>
+                <p className="text-sm mb-6 leading-relaxed" style={{ color: "var(--text-quaternary)", lineHeight: 1.7 }}>
                   "{t.text}"
                 </p>
-                <div style={{ borderTop: "1px solid rgba(0,0,0,0.04)", paddingTop: 16 }}>
-                  <p className="text-sm font-semibold" style={{ color: "#1a1a1a" }}>{t.name}</p>
-                  <p className="text-xs" style={{ color: "rgba(0,0,0,0.25)" }}>{t.role}</p>
+                <div style={{ borderTop: "1px solid var(--border-faint)", paddingTop: 16 }}>
+                  <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{t.name}</p>
+                  <p className="text-xs" style={{ color: "var(--text-quaternary)" }}>{t.role}</p>
                 </div>
               </div>
             ))}
@@ -1352,17 +1352,17 @@ export default function Home() {
 
           {/* ROI */}
           <div className="glass-card-heavy p-10 md:p-14 max-w-4xl mx-auto text-center" data-tilt>
-            <p className="text-xs tracking-widest mb-8" style={{ color: "rgba(0,0,0,0.2)" }}>ROI COMPARISON</p>
+            <p className="text-xs tracking-widest mb-8" style={{ color: "var(--text-faint)" }}>ROI COMPARISON</p>
             <div className="grid md:grid-cols-3 gap-10">
               <Counter to={50} prefix="$" suffix="k" label="Average agency cost" />
               <Counter to={6} suffix=" months" label="Average agency timeline" />
               <div>
                 <p className="text-4xl font-bold tracking-tight" style={{ color: "#059669" }}>$49–$10k</p>
-                <p className="text-sm mt-2" style={{ color: "rgba(0,0,0,0.3)" }}>Your investment</p>
+                <p className="text-sm mt-2" style={{ color: "var(--text-quaternary)" }}>Your investment</p>
               </div>
             </div>
-            <div className="mt-10 pt-8" style={{ borderTop: "1px solid rgba(0,0,0,0.04)" }}>
-              <p className="text-lg font-semibold" style={{ color: "rgba(0,0,0,0.6)" }}>
+            <div className="mt-10 pt-8" style={{ borderTop: "1px solid var(--border-faint)" }}>
+              <p className="text-lg font-semibold" style={{ color: "var(--text-tertiary)" }}>
                 Save 95% · Ship 50x faster · Own 100% of your code
               </p>
             </div>
@@ -1379,10 +1379,10 @@ export default function Home() {
             <div className="flex justify-center mb-6">
               <div className="section-tag pulse-soft"><Sparkles size={12} /> Pricing</div>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "#1a1a1a" }}>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "var(--text-primary)" }}>
               Choose your launch path
             </h2>
-            <p className="text-lg" style={{ color: "rgba(0,0,0,0.4)" }}>
+            <p className="text-lg" style={{ color: "var(--text-quaternary)" }}>
               One price. Full ownership. No recurring fees.
             </p>
           </div>
@@ -1417,7 +1417,7 @@ export default function Home() {
             className="glass-card-gradient py-8 px-6 max-w-2xl mx-auto text-center"
             data-reveal="scale-in"
           >
-            <p className="text-sm" style={{ color: "rgba(0,0,0,0.2)" }}>
+            <p className="text-sm" style={{ color: "var(--text-faint)" }}>
               <Shield size={14} className="inline mr-1" style={{ color: "#059669" }} /> 
               Every plan includes a <strong style={{ color: "#059669" }}>30-day money-back guarantee</strong>. No questions asked.
             </p>
@@ -1434,10 +1434,10 @@ export default function Home() {
             <div className="flex justify-center mb-6">
               <div className="section-tag"><Sparkles size={12} /> AI Advisor</div>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "#1a1a1a" }}>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "var(--text-primary)" }}>
               Not sure where to start? Ask the AI.
             </h2>
-            <p className="text-lg" style={{ color: "rgba(0,0,0,0.4)" }}>
+            <p className="text-lg" style={{ color: "var(--text-quaternary)" }}>
               Describe your idea and get an instant architecture strategy.
             </p>
           </div>
@@ -1460,10 +1460,10 @@ export default function Home() {
             <div className="flex justify-center mb-6">
               <div className="section-tag">FAQ</div>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "#1a1a1a" }}>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mt-6 mb-4" style={{ color: "var(--text-primary)" }}>
               Common questions
             </h2>
-            <p className="text-lg" style={{ color: "rgba(0,0,0,0.4)" }}>
+            <p className="text-lg" style={{ color: "var(--text-quaternary)" }}>
               Everything you need to know before getting started.
             </p>
           </div>
@@ -1480,8 +1480,8 @@ export default function Home() {
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full flex items-center justify-between p-5 text-left"
                 >
-                  <span className="text-sm font-medium" style={{ color: "#1a1a1a" }}>{faq.q}</span>
-                  <ChevronDown size={16} style={{ color: "rgba(0,0,0,0.2)", transform: openFaq === i ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.3s", flexShrink: 0 }} />
+                  <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{faq.q}</span>
+                  <ChevronDown size={16} style={{ color: "var(--text-faint)", transform: openFaq === i ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.3s", flexShrink: 0 }} />
                 </button>
                 <div
                   style={{
@@ -1492,7 +1492,7 @@ export default function Home() {
                   }}
                 >
                   <div className="px-5 pb-5 pt-0">
-                    <p className="text-sm leading-relaxed" style={{ color: "rgba(0,0,0,0.35)", lineHeight: 1.7 }}>{faq.a}</p>
+                    <p className="text-sm leading-relaxed" style={{ color: "var(--text-quaternary)", lineHeight: 1.7 }}>{faq.a}</p>
                   </div>
                 </div>
               </div>
@@ -1510,11 +1510,11 @@ export default function Home() {
             <div className="mesh-bg absolute inset-0 pointer-events-none" />
             <div className="shimmer-line absolute top-0 left-0 right-0 h-[1px]" />
             <div className="relative" style={{ zIndex: 1 }}>
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 leading-tight" style={{ color: "#1a1a1a" }}>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 leading-tight" style={{ color: "var(--text-primary)" }}>
                 Your SaaS is ready to be{" "}
                 <span className="gradient-text">built</span>
               </h2>
-              <p className="text-lg mb-10" style={{ color: "rgba(0,0,0,0.4)" }}>
+              <p className="text-lg mb-10" style={{ color: "var(--text-quaternary)" }}>
                 Enter your niche above and ship your production SaaS tonight.
               </p>
               <div className="flex flex-col md:flex-row gap-4 max-w-xl mx-auto">
@@ -1538,7 +1538,7 @@ export default function Home() {
                   )}
                 </button>
               </div>
-              <p className="mt-6 text-sm" style={{ color: "rgba(0,0,0,0.15)" }}>
+              <p className="mt-6 text-sm" style={{ color: "var(--text-faint)" }}>
                 <Shield size={14} className="inline mr-1" /> 30-day guarantee · Full ownership · No subscription
               </p>
             </div>
@@ -1550,9 +1550,9 @@ export default function Home() {
       <footer className="py-12 px-6 relative" style={{ zIndex: 1 }}>
         <div className="glass-card-heavy max-w-7xl mx-auto py-10 px-8 text-center">
           <div className="text-base font-bold tracking-tight mb-4">
-            <span style={{ color: "#6366f1" }}>NEON</span><span style={{ color: "rgba(0,0,0,0.4)" }}>_CORE</span>
+            <span style={{ color: "#6366f1" }}>NEON</span><span style={{ color: "var(--text-quaternary)" }}>_CORE</span>
           </div>
-          <p className="text-xs" style={{ color: "rgba(0,0,0,0.1)" }}>
+          <p className="text-xs" style={{ color: "var(--text-faint)" }}>
             © 2026 NEON-CORE AI. All rights reserved.
           </p>
         </div>

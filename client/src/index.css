@@ -76,6 +76,21 @@
   --sidebar-accent-foreground: #6366f1;
   --sidebar-border: rgba(0,0,0,0.06);
   --sidebar-ring: #6366f1;
+  --text-strong: rgba(0,0,0,0.8);
+  --text-tertiary: rgba(0,0,0,0.5);
+  --text-quaternary: rgba(0,0,0,0.35);
+  --text-faint: rgba(0,0,0,0.12);
+  --border-faint: rgba(0,0,0,0.04);
+  --bg-faint: rgba(0,0,0,0.02);
+  --accent-bg: rgba(99,102,241,0.08);
+  --card-bg: rgba(255,255,255,0.5);
+  --card-bg-highlight: rgba(255,255,255,0.8);
+  --card-border-accent: rgba(99,102,241,0.2);
+  --chat-assistant-bg: rgba(255,255,255,0.6);
+  --chat-assistant-border: rgba(255,255,255,0.8);
+  --chat-input-area: rgba(255,255,255,0.3);
+  --chat-scrollbar: rgba(0,0,0,0.08);
+  --chat-scrollbar-hover: rgba(0,0,0,0.15);
 }
 
 .dark {
@@ -111,6 +126,21 @@
   --chart-3: #a78bfa;
   --chart-4: #6366f1;
   --chart-5: #8b5cf6;
+  --text-strong: rgba(255,255,255,0.85);
+  --text-tertiary: rgba(255,255,255,0.6);
+  --text-quaternary: rgba(255,255,255,0.45);
+  --text-faint: rgba(255,255,255,0.15);
+  --border-faint: rgba(255,255,255,0.04);
+  --bg-faint: rgba(255,255,255,0.02);
+  --accent-bg: rgba(129,140,248,0.08);
+  --card-bg: rgba(20,20,30,0.5);
+  --card-bg-highlight: rgba(20,20,30,0.8);
+  --card-border-accent: rgba(129,140,248,0.2);
+  --chat-assistant-bg: rgba(20,20,30,0.6);
+  --chat-assistant-border: rgba(255,255,255,0.06);
+  --chat-input-area: rgba(255,255,255,0.04);
+  --chat-scrollbar: rgba(255,255,255,0.08);
+  --chat-scrollbar-hover: rgba(255,255,255,0.15);
 }
 
 @layer base {

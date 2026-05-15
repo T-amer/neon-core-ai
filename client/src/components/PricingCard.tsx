@@ -34,18 +34,18 @@ export const PricingCard: React.FC<PricingCardProps> = ({
     <div
       className="relative rounded-2xl p-8 transition-all duration-300"
       style={{
-        background: isPopular ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.5)",
+        background: isPopular ? "var(--card-bg-highlight)" : "var(--card-bg)",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
-        border: isPopular ? `1px solid rgba(99,102,241,0.2)` : "1px solid rgba(255,255,255,0.8)",
-        boxShadow: isPopular ? "0 8px 40px rgba(99,102,241,0.08)" : "none",
+        border: isPopular ? "1px solid var(--card-border-accent)" : "1px solid var(--chat-assistant-border)",
+        boxShadow: isPopular ? "0 8px 40px var(--card-border-accent)" : "none",
       }}
     >
       {isPopular && (
         <div
           className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-semibold tracking-wider"
           style={{
-            background: "rgba(99,102,241,0.9)",
+            background: "var(--primary)",
             backdropFilter: "blur(8px)",
             color: "#fff",
           }}
@@ -54,18 +54,18 @@ export const PricingCard: React.FC<PricingCardProps> = ({
         </div>
       )}
 
-      <h3 className="text-lg font-semibold mb-1" style={{ color: "#1a1a1a" }}>{title}</h3>
-      <p className="text-sm mb-6" style={{ color: "rgba(0,0,0,0.35)" }}>{description}</p>
+      <h3 className="text-lg font-semibold mb-1" style={{ color: "var(--text-primary)" }}>{title}</h3>
+      <p className="text-sm mb-6" style={{ color: "var(--text-quaternary)" }}>{description}</p>
 
       <div className="mb-8">
-        <span className="text-4xl font-bold" style={{ color: "#1a1a1a" }}>{price}</span>
+        <span className="text-4xl font-bold" style={{ color: "var(--text-primary)" }}>{price}</span>
       </div>
 
       <ul className="space-y-3 mb-10">
         {features.map((feature, index) => (
           <li key={index} className="flex items-start gap-3">
             <span style={{ color: accent, marginTop: 2, flexShrink: 0 }}>✓</span>
-            <span className="text-sm" style={{ color: "rgba(0,0,0,0.45)" }}>{feature}</span>
+            <span className="text-sm" style={{ color: "var(--text-quaternary)" }}>{feature}</span>
           </li>
         ))}
       </ul>
