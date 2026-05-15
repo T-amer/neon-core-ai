@@ -890,36 +890,45 @@ function ScannerLine() {
   );
 }
 
-/* ─── 3D GLOBE ─── */
-function Globe3D() {
+/* ─── 3D GLOBE SECTION ─── */
+function GlobeSection() {
+  const sectionRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const section = sectionRef.current;
+    if (!canvas || !section) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     let animId: number;
     let mouse = { x: 0.5, y: 0.5 };
-    let rotX = 0.3;
+    let rotX = 0.4;
     let rotY = 0;
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const rect = section.getBoundingClientRect();
+      canvas.width = rect.width * 2;
+      canvas.height = rect.height * 2;
+      canvas.style.width = rect.width + "px";
+      canvas.style.height = rect.height + "px";
     };
     resize();
     window.addEventListener("resize", resize);
 
+    const observer = new ResizeObserver(resize);
+    observer.observe(section);
+
     const onMouse = (e: MouseEvent) => {
-      mouse.x = e.clientX / window.innerWidth;
-      mouse.y = e.clientY / window.innerHeight;
+      const rect = section.getBoundingClientRect();
+      mouse.x = (e.clientX - rect.left) / rect.width;
+      mouse.y = (e.clientY - rect.top) / rect.height;
     };
     window.addEventListener("mousemove", onMouse);
 
-    const latSteps = 18;
-    const lngSteps = 24;
+    const latSteps = 20;
+    const lngSteps = 28;
     const points: { theta: number; phi: number }[] = [];
 
     for (let i = 0; i <= latSteps; i++) {
@@ -941,32 +950,32 @@ function Globe3D() {
     }
 
     const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
 
-      const cx = canvas.width * 0.5;
-      const cy = canvas.height * 0.82;
-      const maxR = Math.min(canvas.width, canvas.height) * 0.18;
-      const r = Math.min(maxR, 160);
+      const cx = w * 0.5;
+      const cy = h * 0.52;
+      const r = Math.min(w, h) * 0.3;
 
-      const targetRotY = (mouse.x - 0.5) * 1.2;
-      const targetRotX = 0.3 + (mouse.y - 0.5) * -0.6;
-      rotY += (targetRotY - rotY) * 0.03;
-      rotX += (targetRotX - rotX) * 0.03;
-      rotY += 0.003;
+      const targetRotY = (mouse.x - 0.5) * 1.5;
+      const targetRotX = 0.4 + (mouse.y - 0.5) * -0.8;
+      rotY += (targetRotY - rotY) * 0.04;
+      rotX += (targetRotX - rotX) * 0.04;
+      rotY += 0.004;
 
       const projected: { x: number; y: number; z: number }[] = [];
 
       for (const p of points) {
-        const rad = r;
         let pos = {
-          x: rad * Math.sin(p.theta) * Math.cos(p.phi),
-          y: rad * Math.cos(p.theta),
-          z: rad * Math.sin(p.theta) * Math.sin(p.phi),
+          x: r * Math.sin(p.theta) * Math.cos(p.phi),
+          y: r * Math.cos(p.theta),
+          z: r * Math.sin(p.theta) * Math.sin(p.phi),
         };
         pos = rotateX(pos, rotX);
         pos = rotateY(pos, rotY);
 
-        const perspective = 600 / (600 + pos.z);
+        const perspective = 500 / (500 + pos.z);
         projected.push({
           x: cx + pos.x * perspective,
           y: cy + pos.y * perspective,
@@ -980,13 +989,13 @@ function Globe3D() {
           const idxNext = idx + 1;
           const p1 = projected[idx];
           const p2 = projected[idxNext];
-          if (p1.z > 0 || p2.z > 0) {
-            const alpha = Math.max(0, (p1.z / r + 1) * 0.08 + 0.02);
+          if (p1.z > -r * 0.3 || p2.z > -r * 0.3) {
+            const alpha = Math.max(0.15, (p1.z / r + 1) * 0.35 + 0.1);
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
             ctx.strokeStyle = `rgba(139, 92, 246, ${alpha})`;
-            ctx.lineWidth = 0.6;
+            ctx.lineWidth = 1.2;
             ctx.stroke();
           }
         }
@@ -998,25 +1007,24 @@ function Globe3D() {
           const idxNext = (i + 1) * (lngSteps + 1) + j;
           const p1 = projected[idx];
           const p2 = projected[idxNext];
-          if (p1.z > 0 || p2.z > 0) {
-            const alpha = Math.max(0, (p1.z / r + 1) * 0.08 + 0.02);
+          if (p1.z > -r * 0.3 || p2.z > -r * 0.3) {
+            const alpha = Math.max(0.15, (p1.z / r + 1) * 0.35 + 0.1);
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
             ctx.strokeStyle = `rgba(167, 139, 250, ${alpha})`;
-            ctx.lineWidth = 0.6;
+            ctx.lineWidth = 1.2;
             ctx.stroke();
           }
         }
       }
 
-      const glowAlpha = 0.03 + (1 - Math.abs(mouse.y - 0.5) * 2) * 0.02;
-      const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 1.5);
-      glow.addColorStop(0, `rgba(99, 102, 241, ${glowAlpha})`);
-      glow.addColorStop(0.5, `rgba(139, 92, 246, ${glowAlpha * 0.5})`);
+      const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 1.2);
+      glow.addColorStop(0, "rgba(99, 102, 241, 0.08)");
+      glow.addColorStop(0.4, "rgba(139, 92, 246, 0.04)");
       glow.addColorStop(1, "transparent");
       ctx.fillStyle = glow;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, w, h);
 
       animId = requestAnimationFrame(draw);
     };
@@ -1024,21 +1032,46 @@ function Globe3D() {
 
     return () => {
       cancelAnimationFrame(animId);
+      observer.disconnect();
       window.removeEventListener("resize", resize);
       window.removeEventListener("mousemove", onMouse);
     };
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 0,
-        pointerEvents: "none",
-      }}
-    />
+    <section className="py-24 px-6 relative overflow-hidden" style={{ zIndex: 1 }}>
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-12" data-reveal="fade-up">
+          <div className="flex justify-center mb-6">
+            <div className="section-tag pulse-soft">3D Interactive</div>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
+            Global <span className="gradient-text">Reach</span>
+          </h2>
+          <p className="text-lg mt-4" style={{ color: "var(--text-quaternary)" }}>
+            Deployed worldwide. Built for any market.
+          </p>
+        </div>
+        <div
+          ref={sectionRef}
+          className="glass-card-gradient relative overflow-hidden"
+          style={{ height: "420px", padding: 0 }}
+          data-card-spotlight
+        >
+          <div className="mesh-bg absolute inset-0 pointer-events-none" />
+          <canvas
+            ref={canvasRef}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              pointerEvents: "none",
+            }}
+          />
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -1443,9 +1476,6 @@ export default function Home() {
 
       {/* SCANNER LINE */}
       <ScannerLine />
-
-      {/* 3D GLOBE */}
-      <Globe3D />
 
       {/* DOT PATTERN */}
       <div className="fixed inset-0 pointer-events-none z-0 dots-bg" />
@@ -2038,6 +2068,9 @@ export default function Home() {
 
       {/* NEON GRID */}
       <NeonGrid />
+
+      {/* 3D GLOBE SECTION */}
+      <GlobeSection />
 
       {/* FOOTER */}
       <footer className="py-12 px-6 relative" style={{ zIndex: 1 }}>
