@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { NeonButton } from "@/components/NeonButton";
 import { CodePreview } from "@/components/CodePreview";
+import Globe3D from "@/components/Globe3D";
 import { PricingCard } from "@/components/PricingCard";
 import { AIChatBox, Message } from "@/components/AIChatBox";
 import { Loader2, Star, Shield, Clock, Check, ChevronDown, Menu, X, ArrowRight, Zap, Sparkles, ChevronUp, Sun, Moon } from "lucide-react";
@@ -2400,7 +2401,7 @@ export default function Home() {
       <NeonGrid />
 
       {/* 3D GLOBE SECTION */}
-      <GlobeSection />
+      <Globe3D />
 
       {/* FOOTER */}
       <footer className="py-12 px-6 relative" style={{ zIndex: 1 }}>
