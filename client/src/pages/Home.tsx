@@ -984,7 +984,27 @@ const CONNECTIONS: [number, number][] = [
   [0,1],[1,3],[1,4],[0,4],[2,6],[2,9],[2,11],[7,0],[7,1],[8,1],[10,12],[13,0],[14,8],[3,6],[9,6],[5,9],[5,12],[15,0],[16,8],[17,2],[17,6],
 ];
 
-/* ─── 3D GLOBE SECTION ─── */
+/* ─── SIMPLIFIED CONTINENTS ─── */
+const CONTINENTS: [number, number][][] = [
+  // North America
+  [[60,-170],[65,-168],[70,-160],[72,-140],[70,-110],[65,-95],[60,-85],[55,-75],[50,-65],[45,-65],[42,-70],[40,-75],[35,-80],[30,-85],[25,-80],[25,-90],[28,-95],[30,-100],[28,-105],[25,-110],[25,-115],[30,-120],[35,-122],[40,-125],[45,-125],[48,-125],[50,-130],[55,-135],[60,-145],[60,-155],[60,-170]],
+  // South America
+  [[10,-75],[8,-77],[5,-78],[0,-80],[-5,-80],[-10,-78],[-15,-75],[-20,-70],[-25,-68],[-30,-67],[-35,-65],[-40,-65],[-45,-67],[-50,-70],[-52,-72],[-55,-68],[-55,-65],[-50,-60],[-45,-58],[-40,-55],[-35,-55],[-30,-50],[-25,-45],[-20,-42],[-15,-40],[-10,-38],[-5,-35],[0,-50],[5,-60],[8,-65],[10,-70],[10,-75]],
+  // Europe
+  [[70,-25],[68,-20],[65,-15],[60,-5],[55,-10],[50,-5],[48,0],[45,0],[42,3],[40,0],[38,-5],[36,-5],[36,0],[38,5],[40,10],[42,15],[44,20],[46,25],[48,28],[50,30],[52,35],[55,38],[58,35],[60,30],[62,25],[65,20],[68,15],[70,10],[70,-25]],
+  // Africa
+  [[35,-5],[32,-10],[30,-15],[25,-18],[20,-20],[15,-20],[10,-15],[5,-10],[0,-10],[-5,-5],[-10,-10],[-15,-12],[-20,-15],[-25,-15],[-30,-20],[-32,-25],[-35,-20],[-35,-15],[-30,-10],[-25,-5],[-20,5],[-15,10],[-10,15],[-5,20],[0,20],[5,25],[10,25],[15,25],[20,22],[25,20],[30,15],[32,10],[35,5],[35,-5]],
+  // Asia
+  [[70,-25],[72,-20],[75,-15],[78,-10],[80,-5],[80,0],[78,5],[75,10],[72,15],[70,20],[68,25],[65,30],[62,35],[60,40],[58,45],[55,50],[52,55],[50,60],[48,65],[45,70],[42,75],[40,80],[38,85],[35,90],[32,95],[30,100],[28,105],[25,110],[22,115],[20,120],[18,125],[15,130],[12,135],[10,140],[8,145],[5,150],[10,155],[15,155],[20,150],[25,145],[30,140],[35,135],[40,130],[45,130],[50,135],[55,140],[60,145],[62,140],[65,135],[68,130],[70,125],[72,120],[72,110],[70,100],[68,90],[65,80],[60,70],[55,60],[50,50],[45,40],[40,30],[35,25],[30,20],[25,20],[20,22],[15,25],[10,25],[5,25],[0,20],[-5,20],[-10,15],[-10,10],[-5,5],[0,0],[5,-5],[10,-10],[15,-15],[20,-18],[25,-20],[30,-18],[35,-15],[40,-12],[45,-10],[50,-5],[55,0],[60,5],[65,10],[68,15],[70,-25]],
+  // Australia
+  [[-10,140],[-12,145],[-15,150],[-20,155],[-25,155],[-30,155],[-32,150],[-35,148],[-38,145],[-38,140],[-35,138],[-30,135],[-25,135],[-20,138],[-18,140],[-15,140],[-10,140]],
+  // Greenland
+  [[82,-55],[80,-65],[78,-70],[75,-72],[72,-70],[70,-65],[68,-60],[65,-55],[62,-50],[60,-45],[62,-40],[65,-35],[68,-30],[72,-25],[76,-20],[78,-25],[80,-35],[82,-55]],
+  // Antarctica
+  [[-65,-180],[-70,-170],[-75,-160],[-80,-150],[-82,-140],[-84,-130],[-85,-120],[-85,-100],[-83,-80],[-80,-60],[-78,-40],[-75,-20],[-72,0],[-70,20],[-72,40],[-75,60],[-78,80],[-80,100],[-83,120],[-85,140],[-85,160],[-82,170],[-80,-180]],
+];
+
+/* ─── 3D GLOBE SECTION (Google Earth-style) ─── */
 function GlobeSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -1026,14 +1046,6 @@ function GlobeSection() {
 
     const latSteps = 18;
     const lngSteps = 24;
-    const wireframe: { theta: number; phi: number }[] = [];
-    for (let i = 0; i <= latSteps; i++) {
-      const theta = (i / latSteps) * Math.PI;
-      for (let j = 0; j <= lngSteps; j++) {
-        const phi = (j / lngSteps) * Math.PI * 2;
-        wireframe.push({ theta, phi });
-      }
-    }
 
     function rotateX(p: { x: number; y: number; z: number }, a: number) {
       const c = Math.cos(a), s = Math.sin(a);
@@ -1048,6 +1060,10 @@ function GlobeSection() {
       const phi = lng * Math.PI / 180;
       return { x: radius * Math.sin(theta) * Math.cos(phi), y: radius * Math.cos(theta), z: radius * Math.sin(theta) * Math.sin(phi) };
     }
+
+    const lightDir = { x: -0.3, y: -0.4, z: 0.9 };
+    const lightLen = Math.sqrt(lightDir.x ** 2 + lightDir.y ** 2 + lightDir.z ** 2);
+    lightDir.x /= lightLen; lightDir.y /= lightLen; lightDir.z /= lightLen;
 
     const draw = () => {
       const w = canvas.width;
@@ -1070,41 +1086,87 @@ function GlobeSection() {
         return { x: cx + p.x * persp, y: cy + p.y * persp, z: p.z };
       };
 
-      const wireProj = wireframe.map((p) => {
-        const rad = r;
-        return proj3D({ x: rad * Math.sin(p.theta) * Math.cos(p.phi), y: rad * Math.cos(p.theta), z: rad * Math.sin(p.theta) * Math.sin(p.phi) });
-      });
+      function drawOcean() {
+        const grad = ctx.createRadialGradient(cx - r * 0.2, cy - r * 0.2, r * 0.1, cx, cy, r);
+        grad.addColorStop(0, "#0a1628");
+        grad.addColorStop(0.3, "#0d1f3c");
+        grad.addColorStop(0.6, "#06142b");
+        grad.addColorStop(1, "#030a18");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
-      function drawGrid() {
-        for (let i = 1; i < latSteps; i++) {
-          for (let j = 0; j < lngSteps; j++) {
-            const p = wireProj[i * (lngSteps + 1) + j];
-            const q = wireProj[i * (lngSteps + 1) + j + 1];
-            if (p.z > -r * 0.2 || q.z > -r * 0.2) {
-              const a = Math.max(0.03, (p.z / r + 1) * 0.06 + 0.02);
-              ctx.beginPath();
-              ctx.moveTo(p.x, p.y);
-              ctx.lineTo(q.x, q.y);
-              ctx.strokeStyle = `rgba(167, 139, 250, ${a})`;
-              ctx.lineWidth = 0.2;
-              ctx.stroke();
-            }
+      function drawContinents() {
+        for (const contour of CONTINENTS) {
+          const pts3D = contour.map(([lat, lng]) => latLngTo3D(lat, lng, r * 1.002));
+          const projected = pts3D.map(p => proj3D(p));
+          let avgZ = 0;
+          for (const p of projected) avgZ += p.z;
+          avgZ /= projected.length;
+          if (avgZ > -r * 0.2) {
+            const depth = (avgZ / r + 1) * 0.5;
+            const nx = rotateX(rotateY({ x: 0, y: 1, z: 0 }, rotY), rotX);
+            const dot = nx.x * lightDir.x + nx.y * lightDir.y + nx.z * lightDir.z;
+            const shade = 0.3 + Math.max(0, dot) * 0.25;
+            const alpha = Math.max(0.35, depth * 0.7);
+            const r2 = Math.floor(30 * shade);
+            const g2 = Math.floor(60 * shade);
+            const b2 = Math.floor(50 * shade);
+            ctx.beginPath();
+            ctx.moveTo(projected[0].x, projected[0].y);
+            for (let i = 1; i < projected.length; i++) ctx.lineTo(projected[i].x, projected[i].y);
+            ctx.closePath();
+            ctx.fillStyle = `rgba(${r2}, ${g2 + 15}, ${b2 + 20}, ${alpha})`;
+            ctx.fill();
+            ctx.strokeStyle = `rgba(80, 140, 100, ${alpha * 0.15})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
           }
         }
-        for (let j = 0; j <= lngSteps; j++) {
-          for (let i = 0; i < latSteps; i++) {
-            const p = wireProj[i * (lngSteps + 1) + j];
-            const q = wireProj[(i + 1) * (lngSteps + 1) + j];
-            if (p.z > -r * 0.2 || q.z > -r * 0.2) {
-              const a = Math.max(0.03, (p.z / r + 1) * 0.06 + 0.02);
-              ctx.beginPath();
-              ctx.moveTo(p.x, p.y);
-              ctx.lineTo(q.x, q.y);
-              ctx.strokeStyle = `rgba(139, 92, 246, ${a})`;
-              ctx.lineWidth = 0.2;
-              ctx.stroke();
+      }
+
+      function drawGrid() {
+        for (let lat = -60; lat <= 60; lat += 30) {
+          const pts: { x: number; y: number; z: number }[] = [];
+          for (let lng = 0; lng <= 360; lng += 3) {
+            const theta = (90 - lat) * Math.PI / 180;
+            const phi = lng * Math.PI / 180;
+            pts.push({ x: r * Math.sin(theta) * Math.cos(phi), y: r * Math.cos(theta), z: r * Math.sin(theta) * Math.sin(phi) });
+          }
+          ctx.beginPath();
+          for (let i = 0; i < pts.length - 1; i++) {
+            const p1 = proj3D(pts[i]);
+            const p2 = proj3D(pts[i + 1]);
+            if (p1.z > -r * 0.1 || p2.z > -r * 0.1) {
+              ctx.moveTo(p1.x, p1.y);
+              ctx.lineTo(p2.x, p2.y);
             }
           }
+          ctx.strokeStyle = lat === 0 ? "rgba(100, 160, 255, 0.06)" : "rgba(100, 160, 255, 0.03)";
+          ctx.lineWidth = lat === 0 ? 0.3 : 0.15;
+          ctx.stroke();
+        }
+        for (let lng = 0; lng < 360; lng += 30) {
+          const pts: { x: number; y: number; z: number }[] = [];
+          for (let lat = -90; lat <= 90; lat += 3) {
+            const theta = (90 - lat) * Math.PI / 180;
+            const phi = lng * Math.PI / 180;
+            pts.push({ x: r * Math.sin(theta) * Math.cos(phi), y: r * Math.cos(theta), z: r * Math.sin(theta) * Math.sin(phi) });
+          }
+          ctx.beginPath();
+          for (let i = 0; i < pts.length - 1; i++) {
+            const p1 = proj3D(pts[i]);
+            const p2 = proj3D(pts[i + 1]);
+            if (p1.z > -r * 0.1 || p2.z > -r * 0.1) {
+              ctx.moveTo(p1.x, p1.y);
+              ctx.lineTo(p2.x, p2.y);
+            }
+          }
+          ctx.strokeStyle = "rgba(100, 160, 255, 0.02)";
+          ctx.lineWidth = 0.1;
+          ctx.stroke();
         }
       }
 
@@ -1117,18 +1179,23 @@ function GlobeSection() {
           const pulse = 0.6 + 0.4 * Math.sin(animTime * 1.5 + i * 2.1);
           const a = Math.max(0.4, d * 0.9) * pulse;
 
+          const gr = 8 + d * 6;
+          const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, gr);
+          g.addColorStop(0, `rgba(167, 139, 250, ${a * 0.3})`);
+          g.addColorStop(1, "transparent");
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, gr, 0, Math.PI * 2);
+          ctx.fill();
+
           ctx.beginPath();
           ctx.arc(p.x, p.y, 2 + d * 1.5, 0, Math.PI * 2);
           ctx.fillStyle = `rgba(167, 139, 250, ${a})`;
           ctx.fill();
 
-          const gr = 6 + d * 6;
-          const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, gr);
-          g.addColorStop(0, `rgba(167, 139, 250, ${a * 0.4})`);
-          g.addColorStop(1, "transparent");
-          ctx.fillStyle = g;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, gr, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, 1, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 255, ${a * 0.3})`;
           ctx.fill();
         }
       }
@@ -1176,19 +1243,48 @@ function GlobeSection() {
         }
       }
 
-      function drawGlow() {
-        const g = ctx.createRadialGradient(cx, cy, r * 0.2, cx, cy, r * 1.6);
-        g.addColorStop(0, "rgba(99, 102, 241, 0.04)");
-        g.addColorStop(0.4, "rgba(139, 92, 246, 0.02)");
-        g.addColorStop(1, "transparent");
+      function drawAtmosphere() {
+        const g = ctx.createRadialGradient(cx, cy, r * 0.85, cx, cy, r * 1.15);
+        g.addColorStop(0, "rgba(100, 140, 255, 0)");
+        g.addColorStop(0.5, "rgba(99, 102, 241, 0.03)");
+        g.addColorStop(0.85, "rgba(139, 92, 246, 0.06)");
+        g.addColorStop(1, "rgba(167, 139, 250, 0)");
         ctx.fillStyle = g;
-        ctx.fillRect(0, 0, w, h);
+        ctx.beginPath();
+        ctx.arc(cx, cy, r * 1.15, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, r * 1.02, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(100, 150, 255, 0.04)";
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, r * 1.08, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(139, 92, 246, 0.03)";
+        ctx.lineWidth = 0.3;
+        ctx.stroke();
       }
 
+      function drawLighting() {
+        const g = ctx.createRadialGradient(cx - r * 0.3, cy - r * 0.3, r * 0.1, cx, cy, r);
+        g.addColorStop(0, "rgba(255, 255, 255, 0.02)");
+        g.addColorStop(0.4, "rgba(255, 255, 255, 0.01)");
+        g.addColorStop(1, "rgba(0, 0, 0, 0.15)");
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      drawOcean();
+      drawContinents();
       drawGrid();
       drawNodes();
       drawArcs();
-      drawGlow();
+      drawLighting();
+      drawAtmosphere();
       animId = requestAnimationFrame(draw);
     };
     draw();
