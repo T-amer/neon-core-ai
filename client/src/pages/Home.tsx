@@ -2405,7 +2405,24 @@ export default function Home() {
       <NeonGrid />
 
       {/* 3D GLOBE SECTION */}
-      <Globe3D />
+      <section className="py-12 md:py-16 px-6 relative overflow-hidden" style={{ zIndex: 1 }}>
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-8" data-reveal="fade-up">
+            <div className="flex justify-center mb-3">
+              <div className="section-tag pulse-soft">3D Interactive Globe</div>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
+              Global <span className="gradient-text">Infrastructure</span>
+            </h2>
+            <p className="text-sm mt-2" style={{ color: "var(--text-quaternary)" }}>
+              Drag to explore. Scroll to zoom.
+            </p>
+          </div>
+          <div className="glass-card-gradient relative overflow-hidden" style={{ height: "520px", borderRadius: "24px" }}>
+            <Globe3D />
+          </div>
+        </div>
+      </section>
 
       {/* FOOTER */}
       <footer className="py-12 px-6 relative" style={{ zIndex: 1 }}>
