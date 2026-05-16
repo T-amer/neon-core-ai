@@ -202,9 +202,8 @@ export default function Globe3D() {
   const [zoomLevel, setZoomLevel] = useState(6)
 
   return (
-    <div className="w-full h-full bg-black">
-      <Canvas camera={{ position: [0, 1.5, 6], fov: 45 }}>
-        <color attach="background" args={["#000000"]} />
+    <div className="w-full h-full" style={{ background: "var(--background)" }}>
+      <Canvas camera={{ position: [0, 1.5, 6], fov: 45 }} gl={{ alpha: true }}>
         <ambientLight intensity={0.1} />
         <pointLight position={[10, 10, 10]} intensity={0.5} />
         <GlobeContent zoomLevel={zoomLevel} />

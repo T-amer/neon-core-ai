@@ -3,6 +3,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { NeonButton } from "@/components/NeonButton";
 import { CodePreview } from "@/components/CodePreview";
 import Globe3D from "@/components/Globe3D";
+import StarfieldBackground from "@/components/StarfieldBackground";
 import { PricingCard } from "@/components/PricingCard";
 import { AIChatBox, Message } from "@/components/AIChatBox";
 import { Loader2, Star, Shield, Clock, Check, ChevronDown, Menu, X, ArrowRight, Zap, Sparkles, ChevronUp, Sun, Moon } from "lucide-react";
@@ -1781,6 +1782,9 @@ export default function Home() {
         className="spotlight"
         style={{ left: mousePos.x, top: mousePos.y, opacity: mousePos.x < 0 ? 0 : 1 }}
       />
+
+      {/* STARFIELD BACKGROUND */}
+      <StarfieldBackground />
 
       {/* AMBIENT ORBS */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
